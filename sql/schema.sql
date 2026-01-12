@@ -1,0 +1,27 @@
+CREATE DATABASE IF NOT EXISTS crm
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+USE crm;
+
+CREATE TABLE IF NOT EXISTS clients (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(120) NOT NULL,
+  phone VARCHAR(40) NULL,
+  email VARCHAR(120) NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS jobs (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  client_id INT NOT NULL,
+  title VARCHAR(160) NOT NULL,
+  description TEXT NULL,
+  status ENUM('new','in_progress','done','canceled') NOT NULL DEFAULT 'new',
+  price DECIMAL(10,2) NULL,
+  scheduled_at DATETIME NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_jobs_client
+    FOREIGN KEY (client_id) REFERENCES clients(id)
+    ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB;
