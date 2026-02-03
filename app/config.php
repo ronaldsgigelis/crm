@@ -5,7 +5,7 @@ return [
     'host' => '127.0.0.1',
     'name' => 'crm',
     'user' => 'root',
-    'pass' => '',       // XAMPP default
+    'pass' => '',       
     'charset' => 'utf8mb4',
   ],
 ];

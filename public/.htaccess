@@ -1,6 +1,9 @@
 RewriteEngine On
 
 # Ja fails/dir eksistē, nelien uz index.php
+#.htaccess nodrošina front controller principu: visi URL, kas nav reāli faili vai mapes, 
+#tiek pāradresēti uz index.php, kur tālāk notiek maršrutēšana.
+
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]

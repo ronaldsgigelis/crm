@@ -1,0 +1,88 @@
+
+1.  mājasdarbs
+
+
+
+Nr;Modulis;Fails;Izmaiņa;Ko dod
+1;Clients;clients.php;Email input type=email + autocomplete + maxlength + placeholder;Pārlūks validē e-pastu un UX labāks
+2;Clients;clients.php;Phone input autocomplete=tel + inputmode=tel + maxlength + placeholder;Ērtāka ievade telefonam
+3;Clients;ClientsController.php;Name required validācija;Nevar saglabāt klientu bez vārda
+4;Clients;ClientsController.php;Phone validācija (regex + plus sākumā + ciparu garums);Nevar saglabāt nekorektus telefona numurus
+5;Clients;ClientsController.php;Prepared statement + tukšais uz NULL;Drošāk un korektāk DB
+6;Jobs;jobs.php;scheduled_at type=datetime-local;Kalendārs/pulkstenis un pareizs formāts
+7;Jobs;JobsController.php;jobs_fetch_all() helperis;Nav SQL dublēšanās, vieglāk uzturēt
+8;Jobs;JobsController.php;jobs_index() izmanto jobs_fetch_all();Kods tīrāks
+9;Jobs;JobsController.php;client_id whitelist (in_array);Nevar saglabāt darbu ar neeksistējošu klientu
+10;Jobs;JobsController.php;scheduled_at parse uz Y-m-d H:i:s;DB vienmēr saņem korektu DATETIME
+11;Jobs;JobsController.php;Validācijas kļūdās jobs saraksts nepazūd;jauka UX, nav tukša tabula
+12;Jobs;JobsController.php;Status whitelist job_update_status();Nevar ielikt random statusu
+
+
+
+2. mājasdarbs
+
+
+
+
+
+
+
+
+
+
+
+
+CRM CORE (DEFAULT PRODUKTS – 80% KLIENTU)
+
+
+Nr;Bloks;Funkcionalitate;Biznesa vertiba;Tehniskais kodols
+1;Darbu izpilde;Meistari + darbu piešķiršana meistaram;Tu deleģē darbus, meistars redz ko darīt;
+masters table + jobs.master_id + my-jobs token view
+
+2;Darbu plūsma;Job status workflow + today/tomorrow/week/overdue;Kontrole pār izpildi un kavējumiem;status enum + scheduled_at logic + filters
+
+3;Darbu konteksts;Piezīmes pie darba (iekšējās);Visa info vienuviet, nav WhatsApp haosa;job_notes + job_show timeline
+
+4;Dokumenti;Failu pielikumi pie darba;Pirms/pēc bildes, līgumi, čekus;job_files + uploads + validation
+
+5;Nauda;Rēķini (Invoices) + apmaksa;Ieņēmumi, parādi, kontrole;invoices + payments + status
+
+6;Klientu pārvaldība;Klientu kartīte + darba vēsture;Redzi visu sadarbības vēsturi;clients + jobs by client
+
+7;Meklēšana;Globālā meklēšana (clients + jobs);Ātra orientācija sistēmā;SQL LIKE + indexi
+
+8;Eksports;CSV eksports (clients/jobs/invoices);Grāmatvedība, backup, analīze;ExportController + headers
+
+
+
+
+
+CRM PRO (UZLABOJUMI, PAR KO MAKSĀ PAPILDU)
+
+9;Kontrole;Statusu vēsture (audit trail);Nav strīdu, viss izsekojams;job_status_history auto insert
+
+10;Finanses;Darba izmaksas + peļņas aprēķins;Redzi kas pelna un kas ne;price, cost, master_fee fields
+
+11;Atskaites;Dashboard + atskaites pa periodiem;Vadības skats, KPI;SQL aggregations + reports view
+
+12;Pieejas;Lomas un pieejas (admin/manager/master);Drošība un atbildība;users + roles + middleware
+
+13;Automātika;Automātiskas darbības;Mazāk manuāla darba;rules (status->action)
+
+14;Atgādinājumi un paziņojumi;Automātiski atgādinājumi (Email/WhatsApp/Telegram);
+message templates + triggers
+
+
+
+
+CRM ENTERPRISE (RETĀK, BET DĀRGI)
+
+15;Pielāgošana;Custom fields katram biznesam;Der jebkurai nozarei;custom_fields + values
+
+16;Uzņēmumi;Multi-company (1 CRM - vairāki uzņēmumi);Aģentūras modelis;company_id visās tabulās
+
+17;Integrācijas;Bankas, e-rēķini, grāmatvedība;Automātiska nauda;API integrations
+
+18;Noliktava;Materiāli un noliktava;Servisa uzņēmumiem;materials + job_materials
+
+19;API;Ārējais API;Mobilās aplikācijas;REST endpoints

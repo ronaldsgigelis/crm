@@ -1,27 +1,36 @@
-CREATE DATABASE IF NOT EXISTS crm
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
-
+CREATE DATABASE IF NOT EXISTS crm CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE crm;
-
 CREATE TABLE IF NOT EXISTS clients (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(120) NOT NULL,
   phone VARCHAR(40) NULL,
   email VARCHAR(120) NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB;
-
+) ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS jobs (
   id INT AUTO_INCREMENT PRIMARY KEY,
   client_id INT NOT NULL,
   title VARCHAR(160) NOT NULL,
   description TEXT NULL,
-  status ENUM('new','in_progress','done','canceled') NOT NULL DEFAULT 'new',
-  price DECIMAL(10,2) NULL,
+  status ENUM('new', 'in_progress', 'done', 'canceled') NOT NULL DEFAULT 'new',
+  price DECIMAL(10, 2) NULL,
   scheduled_at DATETIME NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_jobs_client
-    FOREIGN KEY (client_id) REFERENCES clients(id)
-    ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB;
+  CONSTRAINT fk_jobs_client FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE = InnoDB;
+-- 1) Meistari
+CREATE TABLE IF NOT EXISTS masters (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(120) NOT NULL,
+  phone VARCHAR(40) NULL,
+  email VARCHAR(120) NULL,
+  token CHAR(64) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_masters_token (token)
+) ENGINE = InnoDB;
+-- 2) Jobs piesaiste meistaram
+ALTER TABLE jobs
+ADD COLUMN master_id INT NULL
+AFTER client_id,
+  ADD CONSTRAINT fk_jobs_master FOREIGN KEY (master_id) REFERENCES masters(id) ON DELETE
+SET NULL ON UPDATE CASCADE;

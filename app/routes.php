@@ -1,11 +1,12 @@
 <?php
 
 function base_path(): string {
-  // piem.: /crm_mvp_mysql/public
+  // piem.: /crm/public
   $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
   return $base === '.' ? '' : $base;
 }
 
+  //Paņem tikai ceļu no URL (bez query string)
 function path(): string {
   $uri  = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
   $base = base_path();
