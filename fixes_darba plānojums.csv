@@ -1,88 +1,90 @@
+1. mājasdarbs - jau izdarītie uzlabojumi
+Clients
 
-1.  mājasdarbs
+E-pasta lauks ar HTML validāciju
 
+Telefona lauks ar ērtāku ievadi
 
+Vārda obligātā validācija
 
-Nr;Modulis;Fails;Izmaiņa;Ko dod
-1;Clients;clients.php;Email input type=email + autocomplete + maxlength + placeholder;Pārlūks validē e-pastu un UX labāks
-2;Clients;clients.php;Phone input autocomplete=tel + inputmode=tel + maxlength + placeholder;Ērtāka ievade telefonam
-3;Clients;ClientsController.php;Name required validācija;Nevar saglabāt klientu bez vārda
-4;Clients;ClientsController.php;Phone validācija (regex + plus sākumā + ciparu garums);Nevar saglabāt nekorektus telefona numurus
-5;Clients;ClientsController.php;Prepared statement + tukšais uz NULL;Drošāk un korektāk DB
-6;Jobs;jobs.php;scheduled_at type=datetime-local;Kalendārs/pulkstenis un pareizs formāts
-7;Jobs;JobsController.php;jobs_fetch_all() helperis;Nav SQL dublēšanās, vieglāk uzturēt
-8;Jobs;JobsController.php;jobs_index() izmanto jobs_fetch_all();Kods tīrāks
-9;Jobs;JobsController.php;client_id whitelist (in_array);Nevar saglabāt darbu ar neeksistējošu klientu
-10;Jobs;JobsController.php;scheduled_at parse uz Y-m-d H:i:s;DB vienmēr saņem korektu DATETIME
-11;Jobs;JobsController.php;Validācijas kļūdās jobs saraksts nepazūd;jauka UX, nav tukša tabula
-12;Jobs;JobsController.php;Status whitelist job_update_status();Nevar ielikt random statusu
+Telefona validācija servera pusē
 
+Drošāka saglabāšana datubāzē ar prepared statements
 
+Jobs
 
-2. mājasdarbs
+scheduled_at lauks kā datetime-local
 
+Kopīgs jobs_fetch_all() helperis
 
+jobs_index() izmanto helperi
 
+client_id pārbaude pret atļautajiem klientiem
 
+scheduled_at pārveide uz DB formātu
 
+Validācijas kļūdu gadījumā darbu saraksts nepazūd
 
-
-
-
-
-
-
-CRM CORE (DEFAULT PRODUKTS – 80% KLIENTU)
-
-
-Nr;Bloks;Funkcionalitate;Biznesa vertiba;Tehniskais kodols
-1;Darbu izpilde;Meistari + darbu piešķiršana meistaram;Tu deleģē darbus, meistars redz ko darīt;
-masters table + jobs.master_id + my-jobs token view
-
-2;Darbu plūsma;Job status workflow + today/tomorrow/week/overdue;Kontrole pār izpildi un kavējumiem;status enum + scheduled_at logic + filters
-
-3;Darbu konteksts;Piezīmes pie darba (iekšējās);Visa info vienuviet, nav WhatsApp haosa;job_notes + job_show timeline
-
-4;Dokumenti;Failu pielikumi pie darba;Pirms/pēc bildes, līgumi, čekus;job_files + uploads + validation
-
-5;Nauda;Rēķini (Invoices) + apmaksa;Ieņēmumi, parādi, kontrole;invoices + payments + status
-
-6;Klientu pārvaldība;Klientu kartīte + darba vēsture;Redzi visu sadarbības vēsturi;clients + jobs by client
-
-7;Meklēšana;Globālā meklēšana (clients + jobs);Ātra orientācija sistēmā;SQL LIKE + indexi
-
-8;Eksports;CSV eksports (clients/jobs/invoices);Grāmatvedība, backup, analīze;ExportController + headers
+Statusa whitelist atjaunošanā
 
 
 
 
 
-CRM PRO (UZLABOJUMI, PAR KO MAKSĀ PAPILDU)
 
-9;Kontrole;Statusu vēsture (audit trail);Nav strīdu, viss izsekojams;job_status_history auto insert
+2. mājasdarbs - ko veidot tālāk
+CRM MVP - galvenais
 
-10;Finanses;Darba izmaksas + peļņas aprēķins;Redzi kas pelna un kas ne;price, cost, master_fee fields
+Klienti
+Klientu saraksts, kartīte, kontaktinformācija, piezīmes
 
-11;Atskaites;Dashboard + atskaites pa periodiem;Vadības skats, KPI;SQL aggregations + reports view
+Darbi / pakalpojumi
+Darba izveide, datums, statuss, saistītais klients
 
-12;Pieejas;Lomas un pieejas (admin/manager/master);Drošība un atbildība;users + roles + middleware
+Rēķini
+Rēķina izveide no darba vai klienta, numurs, datumi, summa, statuss
 
-13;Automātika;Automātiskas darbības;Mazāk manuāla darba;rules (status->action)
+Maksājumu statuss
+Neapmaksāts / apmaksāts / kavēts
 
-14;Atgādinājumi un paziņojumi;Automātiski atgādinājumi (Email/WhatsApp/Telegram);
-message templates + triggers
+PDF ģenerēšana
+Poga ģenerēt rēķinu PDF formātā
+
+Rēķinu glabāšana
+Saglabāt rēķinus sistēmā, lai tos var apskatīt vēlāk
+
+Statistika / filtrēšana
+Filtrs pa periodu, klientu skaits, rēķinu skaits, ieņēmumi
+
+Tiesības
+Rēķinus dzēst vai arhivēt drīkst tikai administrators
 
 
 
+Ko pagaidām nevajag
 
-CRM ENTERPRISE (RETĀK, BET DĀRGI)
+Šobrīd nevajag likt iekšā:
 
-15;Pielāgošana;Custom fields katram biznesam;Der jebkurai nozarei;custom_fields + values
+multi-company
 
-16;Uzņēmumi;Multi-company (1 CRM - vairāki uzņēmumi);Aģentūras modelis;company_id visās tabulās
+API
 
-17;Integrācijas;Bankas, e-rēķini, grāmatvedība;Automātiska nauda;API integrations
+banku integrācijas
 
-18;Noliktava;Materiāli un noliktava;Servisa uzņēmumiem;materials + job_materials
+e-rēķinu integrācijas
 
-19;API;Ārējais API;Mobilās aplikācijas;REST endpoints
+noliktavu
+
+custom fields
+
+automātikas
+
+WhatsApp / Telegram paziņojumus
+
+sarežģītas lomas
+
+peļņas aprēķinus
+
+audit trail
+
+Tas viss ir par smagu šim etapam.

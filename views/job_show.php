@@ -2,9 +2,11 @@
 
 /** @var array|null $job */ ?>
 <?php /** @var string|null $error */ ?>
-<!-- View: viena darba kartīte + statusa maiņas forma 
- job_show.php ir viena darba detalizētā kartīte. Ja darbs nav atrasts, rāda kļūdu. 
- Ja ir atrasts, rāda laukus un dod formu statusa maiņai ar POST uz /job, nosūtot hidden id.-->
+<?php /** @var array $masters */ ?>
+
+<!-- View: viena darba kartīte + rediģēšana + statusa maiņa
+ job_show.php ir viena darba detalizētā kartīte. Ja darbs nav atrasts, rāda kļūdu.
+ Ja ir atrasts, rāda laukus un dod formas rediģēšanai. -->
 
 <?php if (!$job): ?>
   <!-- Ja kontrolieris neatrod darbu pēc ID -->
@@ -14,12 +16,22 @@
 
   <div class="card">
     <!-- Darba pamatinformācija -->
-    <h2>#<?= (int)$job['id'] ?> — <?= h($job['title']) ?></h2>
+    <h2>#<?= (int)$job['id'] ?> - <?= h($job['title']) ?></h2>
+
+    <?php if ($error): ?>
+      <p class="error"><?= h($error) ?></p>
+    <?php endif; ?>
 
     <p><strong>Klients:</strong> <?= h($job['client_name']) ?></p>
-    <p><strong>Statuss:</strong> <?= h($job['status']) ?></p>
-    <p><strong>Cena:</strong> <?= h($job['price'] ?? '') ?></p>
+
+    <!-- Statusu lietotājam rādam latviski -->
+    <p><strong>Statuss:</strong> <?= h(job_status_label($job['status'])) ?></p>
+
+    <p><strong>Cena:</strong> <?= h((string)($job['price'] ?? '')) ?></p>
     <p><strong>Plānots:</strong> <?= h($job['scheduled_at'] ?? '') ?></p>
+
+    <!-- Ja meistars ir piešķirts, rādam viņa vārdu -->
+    <p><strong>Meistars:</strong> <?= h($job['master_name'] ?? '') ?></p>
 
     <!-- Apraksts: h() pret XSS + nl2br lai saglabā rindas -->
     <p><strong>Apraksts:</strong><br>
@@ -28,11 +40,57 @@
 
     <hr>
 
+    <!-- Pilna darba rediģēšana -->
+    <h3>Rediģēt darbu</h3>
 
-
-    <h3>Piešķirt meistaru</h3>
-    <form method="post" action="<?= url('/job-assign') ?>">
+    <form method="post" action="<?= url('/job-update') ?>">
       <input type="hidden" name="id" value="<?= (int)$job['id'] ?>">
+
+      <!-- Virsraksts -->
+      <label>Virsraksts*</label>
+      <input
+        name="title"
+        required
+        maxlength="160"
+        value="<?= h($job['title'] ?? '') ?>"
+        placeholder="Piemēram, klavieru skaņošana">
+
+      <!-- Apraksts -->
+      <label>Apraksts</label>
+      <textarea
+        name="description"
+        rows="4"
+        placeholder="Papildu informācija par darbu"><?= h($job['description'] ?? '') ?></textarea>
+
+      <!-- Statuss -->
+      <label>Statuss</label>
+      <select name="status">
+        <?php foreach (['new', 'in_progress', 'done', 'canceled'] as $s): ?>
+          <option value="<?= h($s) ?>" <?= ($job['status'] ?? '') === $s ? 'selected' : '' ?>>
+            <?= h(job_status_label($s)) ?>
+          </option>
+        <?php endforeach; ?>
+      </select>
+
+      <!-- Cena -->
+      <label>Cena</label>
+      <input
+        name="price"
+        type="number"
+        step="0.01"
+        min="0"
+        value="<?= h(($job['price'] !== null && $job['price'] !== '') ? (string)$job['price'] : '') ?>"
+        placeholder="0.00">
+
+      <!-- Datums un laiks
+           datetime-local input vajag formātā YYYY-MM-DDTHH:MM -->
+      <label>Plānotais darba datums un laiks</label>
+      <input
+        name="scheduled_at"
+        type="datetime-local"
+        value="<?= !empty($job['scheduled_at']) ? h(date('Y-m-d\TH:i', strtotime($job['scheduled_at']))) : '' ?>">
+
+      <!-- Meistars -->
       <label>Meistars</label>
       <select name="master_id">
         <option value="0">-- nav piešķirts --</option>
@@ -47,28 +105,27 @@
       </select>
 
       <div style="margin-top:10px;">
-        <button type="submit">Saglabāt</button>
+        <button type="submit">Saglabāt izmaiņas</button>
       </div>
     </form>
 
+    <hr>
 
-
-
-    <!-- Statusa maiņa (POST) -->
-    <h3>Mainīt statusu</h3>
+    <!-- Atsevišķa statusa maiņa, ja gribi ātri mainīt tikai statusu -->
+    <h3>Mainīt tikai statusu</h3>
 
     <form method="post" action="<?= url('/job') ?>">
       <input type="hidden" name="id" value="<?= (int)$job['id'] ?>">
 
       <select name="status">
         <?php foreach (['new', 'in_progress', 'done', 'canceled'] as $s): ?>
-          <option value="<?= h($s) ?>" <?= $job['status'] === $s ? 'selected' : '' ?>>
-            <?= h($s) ?>
+          <option value="<?= h($s) ?>" <?= ($job['status'] ?? '') === $s ? 'selected' : '' ?>>
+            <?= h(job_status_label($s)) ?>
           </option>
         <?php endforeach; ?>
       </select>
 
-      <button type="submit">Saglabāt</button>
+      <button type="submit">Saglabāt statusu</button>
     </form>
 
   </div>

@@ -18,13 +18,28 @@
     <!-- POST forma uz /clients -->
     <form method="post" action="<?= url('/clients') ?>">
       <label>Vārds*</label>
-      <input name="name" required>
+      <input
+        name="name"
+        required
+        maxlength="120"
+        placeholder="Piemēram, Jānis Bērziņš">
 
       <label>Tālrunis</label>
-      <input name="phone" autocomplete="tel" inputmode="tel" maxlength="32" placeholder="+371 0000000">
+      <input
+        name="phone"
+        type="tel"
+        autocomplete="tel"
+        inputmode="tel"
+        maxlength="40"
+        placeholder="+371 20000000">
 
       <label>E-pasts</label>
-      <input name="email" type="email" autocomplete="email" maxlength="120" placeholder="jūsu@epasts.com">
+      <input
+        name="email"
+        type="email"
+        autocomplete="email"
+        maxlength="120"
+        placeholder="jusu@epasts.com">
 
       <div style="margin-top:10px;">
         <button type="submit">Saglabāt</button>
@@ -47,6 +62,7 @@
           <th>Tālrunis</th>
           <th>E-pasts</th>
           <th>Izveidots</th>
+          <th>Atvērt</th>
         </tr>
       </thead>
       <tbody>
@@ -62,6 +78,11 @@
             <td><?= h($c['phone'] ?? '') ?></td>
             <td><?= h($c['email'] ?? '') ?></td>
             <td><?= h($c['created_at']) ?></td>
+
+            <!-- Saite uz klienta kartīti -->
+            <td>
+              <a href="<?= url('/client?id=' . (int)$c['id']) ?>">Klienta kartīte</a>
+            </td>
           </tr>
         <?php endforeach; ?>
 

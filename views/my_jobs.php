@@ -24,7 +24,10 @@
                     <td><?= (int)$j['id'] ?></td>
                     <td><?= h($j['client_name']) ?></td>
                     <td><?= h($j['title']) ?></td>
-                    <td><?= h($j['status']) ?></td>
+
+                    <!-- Statusu lietotājam rādam latviski -->
+                    <td><?= h(job_status_label($j['status'])) ?></td>
+
                     <td><?= h($j['scheduled_at'] ?? '') ?></td>
                     <td>
                         <a href="<?= url('/job?id=' . (int)$j['id']) ?>" target="_blank">Darba kartīte</a>

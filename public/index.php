@@ -1,20 +1,25 @@
 <?php
 
+// Palīgfunkcijas, piemēram: render(), redirect(), h()
 require_once __DIR__ . '/../app/helpers.php';
+
+// Maršrutu funkcijas: path(), is_route(), url()
 require_once __DIR__ . '/../app/routes.php';
+
+// Kontrolieri
 require_once __DIR__ . '/../app/controllers/ClientsController.php';
 require_once __DIR__ . '/../app/controllers/JobsController.php';
 require_once __DIR__ . '/../app/controllers/MastersController.php';
-require_once __DIR__ . '/../app/controllers/MastersController.php';
 
-
+// Sākumlapa
 if (is_route('GET', '/')) {
   $title = 'CRM';
-  $content = '<p class="muted"> CRM sākums</p>';
+  $content = '<p class="muted">CRM sākums</p>';
   require __DIR__ . '/../views/layout.php';
   exit;
 }
 
+// Klienti
 if (is_route('GET', '/clients')) {
   clients_index();
   exit;
@@ -24,6 +29,13 @@ if (is_route('POST', '/clients')) {
   exit;
 }
 
+// Viena klienta kartīte
+if (is_route('GET', '/client')) {
+  client_show();
+  exit;
+}
+
+// Darbi
 if (is_route('GET', '/jobs')) {
   jobs_index();
   exit;
@@ -33,15 +45,25 @@ if (is_route('POST', '/jobs')) {
   exit;
 }
 
+// Viena darba kartīte
 if (is_route('GET', '/job')) {
   job_show();
   exit;
 }
+
+// Darba statusa maiņa
 if (is_route('POST', '/job')) {
   job_update_status();
   exit;
 }
 
+// Pilna darba rediģēšana
+if (is_route('POST', '/job-update')) {
+  job_update();
+  exit;
+}
+
+// Meistari
 if (is_route('GET', '/masters')) {
   masters_index();
   exit;
@@ -51,17 +73,18 @@ if (is_route('POST', '/masters')) {
   exit;
 }
 
+// Publiska meistara darbu lapa pēc token
 if (is_route('GET', '/my-jobs')) {
   my_jobs();
   exit;
 }
 
+// Darba piešķiršana meistaram
 if (is_route('POST', '/job-assign')) {
   job_assign_master();
   exit;
 }
 
-
-
+// Ja nekas neatbilst, rādam 404
 http_response_code(404);
 echo "404 Not Found";

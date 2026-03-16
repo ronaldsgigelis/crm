@@ -6,10 +6,11 @@
 
 <?php /** @var array $masters */ ?>
 <?php /** @var int $masterId */ ?>
+<?php /** @var string $statusFilter */ ?>
+<?php /** @var int $clientId */ ?>
+<?php /** @var bool $withoutMaster */ ?>
 
-<!-- View: darbu pievienošana + darbu saraksts 
- jobs.php ir view, kur vienā lapā ir darba pievienošanas forma un darbu saraksts. 
- Forma sūta POST uz /jobs, saraksts tiek renderēts no kontroliera datiem.-->
+<!-- View: darbu pievienošana + darbu saraksts -->
 
 <div class="row">
 
@@ -17,7 +18,7 @@
   <div class="card">
     <h2>Pievienot darbu</h2>
 
-    <!-- Kļūdas ziņa (no kontroliera) -->
+    <!-- Kļūdas ziņa -->
     <?php if ($error): ?>
       <p class="error"><?= h($error) ?></p>
     <?php endif; ?>
@@ -38,34 +39,42 @@
 
       <!-- Darba virsraksts -->
       <label>Virsraksts*</label>
-      <input name="title" required>
+      <input
+        name="title"
+        required
+        maxlength="160"
+        placeholder="Piemēram, klavieru skaņošana">
 
       <!-- Darba apraksts -->
       <label>Apraksts</label>
-      <textarea name="description" rows="4"></textarea>
+      <textarea
+        name="description"
+        rows="4"
+        placeholder="Papildu informācija par darbu"></textarea>
 
       <!-- Darba statuss -->
       <label>Statuss</label>
       <select name="status">
-        <option value="new">new</option>
-        <option value="in_progress">in_progress</option>
-        <option value="done">done</option>
-        <option value="canceled">canceled</option>
+        <option value="new">Jauns</option>
+        <option value="in_progress">Procesā</option>
+        <option value="done">Pabeigts</option>
+        <option value="canceled">Atcelts</option>
       </select>
 
-      <!-- Cena (float) -->
+      <!-- Cena -->
       <label>Cena</label>
-      <input name="price" type="number" step="0.01">
+      <input
+        name="price"
+        type="number"
+        step="0.01"
+        min="0"
+        placeholder="0.00">
 
       <!-- Plānotais datums/laiks -->
-      <!-- <label>Plānots datums/laiks</label> -->
-      <!-- <input name="scheduled_at" placeholder="YYYY-MM-DD HH:MM"> -->
       <label>Plānotais darba datums un laiks</label>
       <input name="scheduled_at" type="datetime-local">
 
-
-
-      <!--meistaram pieskirt darbu-->
+      <!-- Meistaram piešķirt darbu -->
       <label>Meistars</label>
       <select name="master_id">
         <option value="0">-- nav piešķirts --</option>
@@ -73,8 +82,6 @@
           <option value="<?= (int)$m['id'] ?>"><?= h($m['name']) ?></option>
         <?php endforeach; ?>
       </select>
-
-
 
       <div style="margin-top:10px;">
         <button type="submit">Saglabāt</button>
@@ -89,24 +96,60 @@
     <!-- Darbu skaits -->
     <p class="muted">Kopā: <?= count($jobs) ?></p>
 
-
-
-    <!--“Visi darbi”,“Tikai Ivans”,utt. -->
+    <!-- Filtri -->
     <form method="get" action="<?= url('/jobs') ?>" style="margin:10px 0;">
-      <label>Filtrs pēc meistara:</label>
+
+      <!-- Filtrs pēc meistara -->
+      <label>Meistars:</label>
       <select name="master_id">
         <option value="0">Visi</option>
         <?php foreach (($masters ?? []) as $m): ?>
-          <option value="<?= (int)$m['id'] ?>" <?= ((int)($masterId ?? 0) === (int)$m['id']) ? 'selected' : '' ?>>
+          <option
+            value="<?= (int)$m['id'] ?>"
+            <?= ((int)($masterId ?? 0) === (int)$m['id']) ? 'selected' : '' ?>>
             <?= h($m['name']) ?>
           </option>
         <?php endforeach; ?>
       </select>
-      <button type="submit">Filtrēt</button>
-      <a href="<?= url('/jobs') ?>" style="margin-left:8px;">Notīrīt</a>
+
+      <!-- Filtrs pēc statusa -->
+      <label style="margin-left:10px;">Statuss:</label>
+      <select name="status">
+        <option value="">Visi</option>
+        <option value="new" <?= ($statusFilter ?? '') === 'new' ? 'selected' : '' ?>>Jauns</option>
+        <option value="in_progress" <?= ($statusFilter ?? '') === 'in_progress' ? 'selected' : '' ?>>Procesā</option>
+        <option value="done" <?= ($statusFilter ?? '') === 'done' ? 'selected' : '' ?>>Pabeigts</option>
+        <option value="canceled" <?= ($statusFilter ?? '') === 'canceled' ? 'selected' : '' ?>>Atcelts</option>
+      </select>
+
+      <!-- Filtrs pēc klienta -->
+      <label style="margin-left:10px;">Klients:</label>
+      <select name="client_id">
+        <option value="0">Visi</option>
+        <?php foreach (($clients ?? []) as $c): ?>
+          <option
+            value="<?= (int)$c['id'] ?>"
+            <?= ((int)($clientId ?? 0) === (int)$c['id']) ? 'selected' : '' ?>>
+            <?= h($c['name']) ?>
+          </option>
+        <?php endforeach; ?>
+      </select>
+
+      <!-- Checkbox filtrs: tikai darbi bez piešķirta meistara -->
+      <div style="margin-top:10px;">
+        <label style="display:inline-flex; align-items:center; gap:8px; white-space:nowrap;">
+          <span>Tikai bez meistara</span>
+          <input
+            type="checkbox"
+            name="without_master"
+            value="1"
+            <?= !empty($withoutMaster) ? 'checked' : '' ?>>
+        </label>
+
+        <button type="submit" style="margin-left:10px;">Filtrēt</button>
+        <a href="<?= url('/jobs') ?>" style="margin-left:8px;">Notīrīt</a>
+      </div>
     </form>
-
-
 
     <table>
       <thead>
@@ -126,10 +169,13 @@
             <td><?= (int)$j['id'] ?></td>
             <td><?= h($j['client_name']) ?></td>
             <td><?= h($j['title']) ?></td>
-            <td><?= h($j['status']) ?></td>
+
+            <!-- Statusu lietotājam rādam latviski -->
+            <td><?= h(job_status_label($j['status'])) ?></td>
+
             <td><?= h($j['price'] ?? '') ?></td>
 
-            <!-- Meistars (var būt tukšs) -->
+            <!-- Meistars var būt tukšs -->
             <td><?= h($j['master_name'] ?? '') ?></td>
 
             <!-- Saite uz darba kartīti -->

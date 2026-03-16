@@ -1,0 +1,82 @@
+<?php
+
+/** @var array|null $client */ ?>
+<?php /** @var array $jobs */ ?>
+<?php /** @var int $jobsCount */ ?>
+<?php /** @var float $totalAmount */ ?>
+
+<!-- View: viena klienta kartīte + viņa darbu vēsture -->
+
+<?php if (!$client): ?>
+    <!-- Ja klients nav atrasts -->
+    <div class="card">
+        <p class="error">Klients nav atrasts.</p>
+    </div>
+
+<?php else: ?>
+
+    <div class="card">
+        <!-- Klienta pamatinformācija -->
+        <h2>Klienta kartīte - <?= h($client['name']) ?></h2>
+
+        <p><strong>ID:</strong> <?= (int)$client['id'] ?></p>
+        <p><strong>Vārds:</strong> <?= h($client['name']) ?></p>
+        <p><strong>Tālrunis:</strong> <?= h($client['phone'] ?? '') ?></p>
+        <p><strong>E-pasts:</strong> <?= h($client['email'] ?? '') ?></p>
+        <p><strong>Izveidots:</strong> <?= h($client['created_at']) ?></p>
+
+        <hr>
+
+        <!-- Īsa statistika par klientu -->
+        <p><strong>Darbu skaits:</strong> <?= (int)$jobsCount ?></p>
+        <p><strong>Kopējā darbu summa:</strong> <?= number_format($totalAmount, 2, '.', '') ?></p>
+
+        <p style="margin-top:12px;">
+            <a href="<?= url('/clients') ?>">← Atpakaļ uz klientiem</a>
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>Klienta darbu vēsture</h2>
+
+        <?php if (!$jobs): ?>
+            <p class="muted">Šim klientam vēl nav neviena darba.</p>
+        <?php else: ?>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Virsraksts</th>
+                        <th>Statuss</th>
+                        <th>Cena</th>
+                        <th>Plānots</th>
+                        <th>Meistars</th>
+                        <th>Atvērt</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <?php foreach ($jobs as $j): ?>
+                        <tr>
+                            <td><?= (int)$j['id'] ?></td>
+                            <td><?= h($j['title']) ?></td>
+
+                            <!-- Statusu rādam latviski ar helperi -->
+                            <td><?= h(job_status_label($j['status'])) ?></td>
+
+                            <td><?= h($j['price'] ?? '') ?></td>
+                            <td><?= h($j['scheduled_at'] ?? '') ?></td>
+                            <td><?= h($j['master_name'] ?? '') ?></td>
+
+                            <td>
+                                <a href="<?= url('/job?id=' . (int)$j['id']) ?>">Darba kartīte</a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+
+                </tbody>
+            </table>
+        <?php endif; ?>
+    </div>
+
+<?php endif; ?>
