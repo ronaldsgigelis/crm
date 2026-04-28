@@ -353,6 +353,7 @@ function invoices_index(): void
 {
   render('invoices.php', [
     'invoices' => invoices_fetch_all(),
+    'deleted' => (int)($_GET['deleted'] ?? 0) === 1,
   ], 'Rēķini');
 }
 
@@ -718,6 +719,24 @@ function invoice_show(): void
   render('invoice_show.php', [
     'invoice' => $invoice,
   ], 'Rēķins');
+}
+
+function invoice_delete(): void
+{
+  $id = (int)($_POST['invoice_id'] ?? 0);
+  if ($id <= 0) {
+    redirect(url('/invoices'));
+  }
+
+  $invoice = invoice_fetch($id);
+  if (!$invoice) {
+    redirect(url('/invoices'));
+  }
+
+  $stmt = db()->prepare("DELETE FROM invoices WHERE id = :id");
+  $stmt->execute([':id' => $id]);
+
+  redirect(url('/invoices?deleted=1'));
 }
 
 function invoice_public_logo_url(?string $path): string

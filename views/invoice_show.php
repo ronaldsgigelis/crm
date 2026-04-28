@@ -47,6 +47,13 @@
           <p><a href="<?= url('/job?id=' . (int)$invoice['job_id']) ?>">Atvērt saistīto darbu</a></p>
         <?php endif; ?>
         <p><a href="<?= url('/invoice-pdf?id=' . (int)$invoice['id']) ?>">Lejupielādēt PDF</a></p>
+        <form
+          method="post"
+          action="<?= url('/invoice-delete') ?>"
+          onsubmit="return confirm('Vai tiešām dzēst šo rēķinu? Ja rēķins jau nosūtīts klientam vai izmantots grāmatvedībā, dzēšana nav ieteicama.');">
+          <input type="hidden" name="invoice_id" value="<?= (int)$invoice['id'] ?>">
+          <button type="submit">Dzēst rēķinu</button>
+        </form>
       </div>
     </div>
   </div>

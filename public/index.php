@@ -114,6 +114,10 @@ if (is_route('GET', '/invoice')) {
   invoice_show();
   exit;
 }
+if (is_route('POST', '/invoice-delete')) {
+  invoice_delete();
+  exit;
+}
 if (is_route('GET', '/invoice-pdf')) {
   invoice_pdf();
   exit;

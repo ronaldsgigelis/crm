@@ -1,6 +1,11 @@
 <?php /** @var array $invoices */ ?>
+<?php /** @var bool $deleted */ ?>
 
 <div class="card">
+  <?php if (!empty($deleted)): ?>
+    <p class="muted">Rēķins dzēsts.</p>
+  <?php endif; ?>
+
   <p class="muted">Kopā: <?= count($invoices) ?></p>
 
   <table>
@@ -36,6 +41,14 @@
             <?php if (!empty($invoice['job_id'])): ?>
               <a href="<?= url('/job?id=' . (int)$invoice['job_id']) ?>" style="margin-left:8px;">Darbs</a>
             <?php endif; ?>
+            <form
+              method="post"
+              action="<?= url('/invoice-delete') ?>"
+              style="display:inline;"
+              onsubmit="return confirm('Vai tiešām dzēst šo rēķinu? Ja rēķins jau nosūtīts klientam vai izmantots grāmatvedībā, dzēšana nav ieteicama.');">
+              <input type="hidden" name="invoice_id" value="<?= (int)$invoice['id'] ?>">
+              <button type="submit">Dzēst</button>
+            </form>
           </td>
         </tr>
       <?php endforeach; ?>
