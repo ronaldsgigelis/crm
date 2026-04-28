@@ -3,19 +3,16 @@
 /** @var array|null $job */ ?>
 <?php /** @var string|null $error */ ?>
 <?php /** @var array $masters */ ?>
+<?php /** @var array|null $invoice */ ?>
 
-<!-- View: viena darba kartīte + rediģēšana + statusa maiņa
- job_show.php ir viena darba detalizētā kartīte. Ja darbs nav atrasts, rāda kļūdu.
- Ja ir atrasts, rāda laukus un dod formas rediģēšanai. -->
+<!-- View: viena darba kartīte + rediģēšana + statusa maiņa -->
 
 <?php if (!$job): ?>
-  <!-- Ja kontrolieris neatrod darbu pēc ID -->
   <p class="error">Darbs nav atrasts.</p>
 
 <?php else: ?>
 
   <div class="card">
-    <!-- Darba pamatinformācija -->
     <h2>#<?= (int)$job['id'] ?> - <?= h($job['title']) ?></h2>
 
     <?php if ($error): ?>
@@ -23,30 +20,34 @@
     <?php endif; ?>
 
     <p><strong>Klients:</strong> <?= h($job['client_name']) ?></p>
-
-    <!-- Statusu lietotājam rādam latviski -->
     <p><strong>Statuss:</strong> <?= h(job_status_label($job['status'])) ?></p>
-
     <p><strong>Cena:</strong> <?= h((string)($job['price'] ?? '')) ?></p>
     <p><strong>Plānots:</strong> <?= h($job['scheduled_at'] ?? '') ?></p>
-
-    <!-- Ja meistars ir piešķirts, rādam viņa vārdu -->
     <p><strong>Meistars:</strong> <?= h($job['master_name'] ?? '') ?></p>
 
-    <!-- Apraksts: h() pret XSS + nl2br lai saglabā rindas -->
     <p><strong>Apraksts:</strong><br>
       <?= nl2br(h($job['description'] ?? '')) ?>
     </p>
 
+    <?php if (!empty($invoice)): ?>
+      <p>
+        <strong>Rēķins jau izveidots:</strong> <?= h($invoice['invoice_number']) ?>
+        <a href="<?= url('/invoice?id=' . (int)$invoice['id']) ?>" style="margin-left:8px;">Skatīt rēķinu</a>
+        <a href="<?= url('/invoice-pdf?id=' . (int)$invoice['id']) ?>" style="margin-left:8px;">Lejupielādēt PDF</a>
+      </p>
+    <?php else: ?>
+      <p>
+        <a href="<?= url('/invoice-create?job_id=' . (int)$job['id']) ?>">Ģenerēt rēķinu</a>
+      </p>
+    <?php endif; ?>
+
     <hr>
 
-    <!-- Pilna darba rediģēšana -->
     <h3>Rediģēt darbu</h3>
 
     <form method="post" action="<?= url('/job-update') ?>">
       <input type="hidden" name="id" value="<?= (int)$job['id'] ?>">
 
-      <!-- Virsraksts -->
       <label>Virsraksts*</label>
       <input
         name="title"
@@ -55,14 +56,12 @@
         value="<?= h($job['title'] ?? '') ?>"
         placeholder="Piemēram, klavieru skaņošana">
 
-      <!-- Apraksts -->
       <label>Apraksts</label>
       <textarea
         name="description"
         rows="4"
         placeholder="Papildu informācija par darbu"><?= h($job['description'] ?? '') ?></textarea>
 
-      <!-- Statuss -->
       <label>Statuss</label>
       <select name="status">
         <?php foreach (['new', 'in_progress', 'done', 'canceled'] as $s): ?>
@@ -72,7 +71,6 @@
         <?php endforeach; ?>
       </select>
 
-      <!-- Cena -->
       <label>Cena</label>
       <input
         name="price"
@@ -82,15 +80,12 @@
         value="<?= h(($job['price'] !== null && $job['price'] !== '') ? (string)$job['price'] : '') ?>"
         placeholder="0.00">
 
-      <!-- Datums un laiks
-           datetime-local input vajag formātā YYYY-MM-DDTHH:MM -->
       <label>Plānotais darba datums un laiks</label>
       <input
         name="scheduled_at"
         type="datetime-local"
         value="<?= !empty($job['scheduled_at']) ? h(date('Y-m-d\TH:i', strtotime($job['scheduled_at']))) : '' ?>">
 
-      <!-- Meistars -->
       <label>Meistars</label>
       <select name="master_id">
         <option value="0">-- nav piešķirts --</option>
@@ -111,7 +106,6 @@
 
     <hr>
 
-    <!-- Atsevišķa statusa maiņa, ja gribi ātri mainīt tikai statusu -->
     <h3>Mainīt tikai statusu</h3>
 
     <form method="post" action="<?= url('/job') ?>">

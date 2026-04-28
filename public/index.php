@@ -10,6 +10,7 @@ require_once __DIR__ . '/../app/routes.php';
 require_once __DIR__ . '/../app/controllers/ClientsController.php';
 require_once __DIR__ . '/../app/controllers/JobsController.php';
 require_once __DIR__ . '/../app/controllers/MastersController.php';
+require_once __DIR__ . '/../app/controllers/InvoicesController.php';
 
 // Sākumlapa
 if (is_route('GET', '/')) {
@@ -82,6 +83,35 @@ if (is_route('GET', '/my-jobs')) {
 // Darba piešķiršana meistaram
 if (is_route('POST', '/job-assign')) {
   job_assign_master();
+  exit;
+}
+
+if (is_route('GET', '/invoice-settings')) {
+  invoice_settings_index();
+  exit;
+}
+if (is_route('POST', '/invoice-settings')) {
+  invoice_settings_store();
+  exit;
+}
+if (is_route('GET', '/invoices')) {
+  invoices_index();
+  exit;
+}
+if (is_route('GET', '/invoice-create')) {
+  invoice_create_form();
+  exit;
+}
+if (is_route('POST', '/invoice-create')) {
+  invoice_store();
+  exit;
+}
+if (is_route('GET', '/invoice')) {
+  invoice_show();
+  exit;
+}
+if (is_route('GET', '/invoice-pdf')) {
+  invoice_pdf();
   exit;
 }
 

@@ -370,9 +370,22 @@ function job_show(): void
   // Meistaru saraksts dropdown laukiem
   $masters = db()->query("SELECT id, name FROM masters ORDER BY name ASC")->fetchAll();
 
+  $invoice = null;
+  if ($job) {
+    $stmt = db()->prepare("
+      SELECT id, invoice_number
+      FROM invoices
+      WHERE job_id = :job_id
+      LIMIT 1
+    ");
+    $stmt->execute([':job_id' => (int)$job['id']]);
+    $invoice = $stmt->fetch() ?: null;
+  }
+
   // Renderē kartīti
   render('job_show.php', [
     'job' => $job,
+    'invoice' => $invoice,
     'masters' => $masters,
     'error' => null
   ], 'Darba kartīte');

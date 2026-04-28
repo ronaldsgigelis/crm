@@ -1,0 +1,9 @@
+/vendor/
+/public/uploads/
+
+/.env
+*.log
+.DS_Store
+Thumbs.db
+
+/.vscode/

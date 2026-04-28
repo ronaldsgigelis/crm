@@ -87,6 +87,8 @@
     <a href="<?= url('/clients') ?>">Klienti</a>
     <a href="<?= url('/jobs') ?>">Darbi</a>
     <a href="<?= url('/masters') ?>">Meistari</a>
+    <a href="<?= url('/invoices') ?>">Rēķini</a>
+    <a href="<?= url('/invoice-settings') ?>">Rēķinu iestatījumi</a>
   </nav>
 
   <!-- Lapas virsraksts -->
