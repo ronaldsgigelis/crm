@@ -1,5 +1,6 @@
 <?php /** @var array $job */ ?>
-<?php /** @var array $settings */ ?>
+<?php /** @var array $profiles */ ?>
+<?php /** @var array|null $selectedProfile */ ?>
 <?php /** @var array $form */ ?>
 <?php /** @var string|null $error */ ?>
 
@@ -8,14 +9,25 @@
     <p class="error"><?= h($error) ?></p>
   <?php endif; ?>
 
-  <?php if (empty($settings['seller_name'])): ?>
-    <p class="error">Vispirms aizpildi rēķinu iestatījumus.</p>
+  <?php if (!$profiles): ?>
+    <p class="error">Vispirms izveido rēķina sūtītāja profilu.</p>
     <p><a href="<?= url('/invoice-settings') ?>">Atvērt rēķinu iestatījumus</a></p>
   <?php else: ?>
     <p class="muted">Darbs #<?= (int)$job['id'] ?>: <?= h($job['title']) ?></p>
 
     <form method="post" action="<?= url('/invoice-create') ?>">
       <input type="hidden" name="job_id" value="<?= (int)$form['job_id'] ?>">
+
+      <label>Rēķina sūtītājs</label>
+      <select name="invoice_profile_id" required>
+        <?php foreach ($profiles as $profile): ?>
+          <option
+            value="<?= (int)$profile['id'] ?>"
+            <?= (int)($form['invoice_profile_id'] ?? 0) === (int)$profile['id'] ? 'selected' : '' ?>>
+            <?= h($profile['profile_name']) ?> - <?= h($profile['seller_name']) ?>
+          </option>
+        <?php endforeach; ?>
+      </select>
 
       <h2>Maksātājs</h2>
       <div class="row">

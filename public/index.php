@@ -94,6 +94,10 @@ if (is_route('POST', '/invoice-settings')) {
   invoice_settings_store();
   exit;
 }
+if (is_route('POST', '/invoice-settings/default')) {
+  invoice_settings_default_store();
+  exit;
+}
 if (is_route('GET', '/invoices')) {
   invoices_index();
   exit;

@@ -4,9 +4,12 @@ require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../helpers.php';
 require_once __DIR__ . '/../routes.php';
 
-function invoice_settings_defaults(): array
+function invoice_profile_defaults(): array
 {
   return [
+    'id' => 0,
+    'profile_name' => '',
+    'is_default' => 0,
     'seller_name' => '',
     'seller_registration_no' => '',
     'seller_vat_no' => '',
@@ -18,21 +21,67 @@ function invoice_settings_defaults(): array
     'seller_swift' => '',
     'invoice_note' => '',
     'logo_path' => '',
+    'show_logo' => 1,
+    'show_seller_vat_no' => 1,
+    'show_seller_email' => 1,
+    'show_seller_phone' => 1,
+    'show_seller_bank_name' => 1,
+    'show_seller_iban' => 1,
+    'show_seller_swift' => 1,
+    'show_invoice_note' => 1,
   ];
 }
 
-function invoice_settings_fetch(): array
+function invoice_profiles_fetch_all(): array
 {
-  $stmt = db()->query("SELECT * FROM invoice_settings WHERE id = 1 LIMIT 1");
-  $settings = $stmt->fetch() ?: [];
+  return db()->query("
+    SELECT *
+    FROM invoice_profiles
+    ORDER BY is_default DESC, id ASC
+  ")->fetchAll();
+}
 
-  return array_merge(invoice_settings_defaults(), $settings);
+function invoice_profile_fetch(int $id): ?array
+{
+  $stmt = db()->prepare("SELECT * FROM invoice_profiles WHERE id = :id LIMIT 1");
+  $stmt->execute([':id' => $id]);
+
+  return $stmt->fetch() ?: null;
+}
+
+function invoice_profile_fetch_default(): ?array
+{
+  $profile = db()->query("
+    SELECT *
+    FROM invoice_profiles
+    WHERE is_default = 1
+    ORDER BY id ASC
+    LIMIT 1
+  ")->fetch();
+
+  if ($profile) {
+    return $profile;
+  }
+
+  $profile = db()->query("
+    SELECT *
+    FROM invoice_profiles
+    ORDER BY id ASC
+    LIMIT 1
+  ")->fetch();
+
+  return $profile ?: null;
 }
 
 function invoice_settings_index(?string $error = null): void
 {
+  $profiles = invoice_profiles_fetch_all();
+  $selectedId = (int)($_GET['id'] ?? 0);
+  $profile = $selectedId > 0 ? invoice_profile_fetch($selectedId) : null;
+
   render('invoice_settings.php', [
-    'settings' => invoice_settings_fetch(),
+    'profiles' => $profiles,
+    'profile' => array_merge(invoice_profile_defaults(), $profile ?: []),
     'error' => $error,
     'saved' => (int)($_GET['saved'] ?? 0) === 1,
   ], 'Rēķinu iestatījumi');
@@ -97,37 +146,59 @@ function invoice_handle_logo_upload(string $currentLogo): array
   return ['ok' => true, 'path' => 'uploads/invoice/' . $fileName, 'error' => null];
 }
 
+function invoice_profile_post_data(array $existing = []): array
+{
+  $data = array_merge(invoice_profile_defaults(), $existing);
+
+  foreach ([
+    'profile_name', 'seller_name', 'seller_registration_no', 'seller_vat_no',
+    'seller_address', 'seller_email', 'seller_phone', 'seller_bank_name',
+    'seller_iban', 'seller_swift', 'invoice_note',
+  ] as $field) {
+    $data[$field] = trim($_POST[$field] ?? '');
+  }
+
+  foreach ([
+    'is_default', 'show_logo', 'show_seller_vat_no', 'show_seller_email',
+    'show_seller_phone', 'show_seller_bank_name', 'show_seller_iban',
+    'show_seller_swift', 'show_invoice_note',
+  ] as $field) {
+    $data[$field] = isset($_POST[$field]) ? 1 : 0;
+  }
+
+  return $data;
+}
+
 function invoice_settings_store(): void
 {
-  $current = invoice_settings_fetch();
-  $logo = invoice_handle_logo_upload($current['logo_path'] ?? '');
+  $id = (int)($_POST['id'] ?? 0);
+  $existing = $id > 0 ? invoice_profile_fetch($id) : null;
+  if ($id > 0 && !$existing) {
+    invoice_settings_index('Profils nav atrasts.');
+    return;
+  }
+
+  $profiles = invoice_profiles_fetch_all();
+  $data = invoice_profile_post_data($existing ?: []);
+  $data['id'] = $id;
+
+  $logo = invoice_handle_logo_upload($existing['logo_path'] ?? '');
   if (!$logo['ok']) {
     render('invoice_settings.php', [
-      'settings' => array_merge($current, $_POST),
+      'profiles' => $profiles,
+      'profile' => $data,
       'error' => $logo['error'],
       'saved' => false,
     ], 'Rēķinu iestatījumi');
     return;
   }
+  $data['logo_path'] = $logo['path'];
 
-  $data = [
-    'seller_name' => trim($_POST['seller_name'] ?? ''),
-    'seller_registration_no' => trim($_POST['seller_registration_no'] ?? ''),
-    'seller_vat_no' => trim($_POST['seller_vat_no'] ?? ''),
-    'seller_address' => trim($_POST['seller_address'] ?? ''),
-    'seller_email' => trim($_POST['seller_email'] ?? ''),
-    'seller_phone' => trim($_POST['seller_phone'] ?? ''),
-    'seller_bank_name' => trim($_POST['seller_bank_name'] ?? ''),
-    'seller_iban' => trim($_POST['seller_iban'] ?? ''),
-    'seller_swift' => trim($_POST['seller_swift'] ?? ''),
-    'invoice_note' => trim($_POST['invoice_note'] ?? ''),
-    'logo_path' => $logo['path'],
-  ];
-
-  if ($data['seller_name'] === '' || $data['seller_registration_no'] === '' || $data['seller_address'] === '') {
+  if ($data['profile_name'] === '' || $data['seller_name'] === '' || $data['seller_registration_no'] === '' || $data['seller_address'] === '') {
     render('invoice_settings.php', [
-      'settings' => $data,
-      'error' => 'Uzņēmuma nosaukums, reģistrācijas numurs un juridiskā adrese ir obligāti.',
+      'profiles' => $profiles,
+      'profile' => $data,
+      'error' => 'Profila nosaukums, pārdevējs, reģistrācijas numurs un juridiskā adrese ir obligāti.',
       'saved' => false,
     ], 'Rēķinu iestatījumi');
     return;
@@ -135,37 +206,134 @@ function invoice_settings_store(): void
 
   if ($data['seller_email'] !== '' && !filter_var($data['seller_email'], FILTER_VALIDATE_EMAIL)) {
     render('invoice_settings.php', [
-      'settings' => $data,
+      'profiles' => $profiles,
+      'profile' => $data,
       'error' => 'E-pasts nav korekts.',
       'saved' => false,
     ], 'Rēķinu iestatījumi');
     return;
   }
 
-  $stmt = db()->prepare("
-    INSERT INTO invoice_settings (
-      id, seller_name, seller_registration_no, seller_vat_no, seller_address,
-      seller_email, seller_phone, seller_bank_name, seller_iban, seller_swift,
-      invoice_note, logo_path
-    ) VALUES (
-      1, :seller_name, :seller_registration_no, :seller_vat_no, :seller_address,
-      :seller_email, :seller_phone, :seller_bank_name, :seller_iban, :seller_swift,
-      :invoice_note, :logo_path
-    )
-    ON DUPLICATE KEY UPDATE
-      seller_name = VALUES(seller_name),
-      seller_registration_no = VALUES(seller_registration_no),
-      seller_vat_no = VALUES(seller_vat_no),
-      seller_address = VALUES(seller_address),
-      seller_email = VALUES(seller_email),
-      seller_phone = VALUES(seller_phone),
-      seller_bank_name = VALUES(seller_bank_name),
-      seller_iban = VALUES(seller_iban),
-      seller_swift = VALUES(seller_swift),
-      invoice_note = VALUES(invoice_note),
-      logo_path = VALUES(logo_path)
-  ");
-  $stmt->execute($data);
+  $isFirstProfile = count($profiles) === 0 && !$existing;
+  if ($isFirstProfile) {
+    $data['is_default'] = 1;
+  }
+
+  $pdo = db();
+  $pdo->beginTransaction();
+  try {
+    if ((int)$data['is_default'] === 1) {
+      $pdo->exec("UPDATE invoice_profiles SET is_default = 0");
+    }
+
+    if ($existing) {
+      $stmt = $pdo->prepare("
+        UPDATE invoice_profiles
+        SET profile_name = :profile_name,
+            is_default = :is_default,
+            seller_name = :seller_name,
+            seller_registration_no = :seller_registration_no,
+            seller_vat_no = :seller_vat_no,
+            seller_address = :seller_address,
+            seller_email = :seller_email,
+            seller_phone = :seller_phone,
+            seller_bank_name = :seller_bank_name,
+            seller_iban = :seller_iban,
+            seller_swift = :seller_swift,
+            invoice_note = :invoice_note,
+            logo_path = :logo_path,
+            show_logo = :show_logo,
+            show_seller_vat_no = :show_seller_vat_no,
+            show_seller_email = :show_seller_email,
+            show_seller_phone = :show_seller_phone,
+            show_seller_bank_name = :show_seller_bank_name,
+            show_seller_iban = :show_seller_iban,
+            show_seller_swift = :show_seller_swift,
+            show_invoice_note = :show_invoice_note
+        WHERE id = :id
+      ");
+      $params = [':id' => $id];
+    } else {
+      $stmt = $pdo->prepare("
+        INSERT INTO invoice_profiles (
+          profile_name, is_default, seller_name, seller_registration_no, seller_vat_no,
+          seller_address, seller_email, seller_phone, seller_bank_name, seller_iban,
+          seller_swift, invoice_note, logo_path, show_logo, show_seller_vat_no,
+          show_seller_email, show_seller_phone, show_seller_bank_name, show_seller_iban,
+          show_seller_swift, show_invoice_note
+        ) VALUES (
+          :profile_name, :is_default, :seller_name, :seller_registration_no, :seller_vat_no,
+          :seller_address, :seller_email, :seller_phone, :seller_bank_name, :seller_iban,
+          :seller_swift, :invoice_note, :logo_path, :show_logo, :show_seller_vat_no,
+          :show_seller_email, :show_seller_phone, :show_seller_bank_name, :show_seller_iban,
+          :show_seller_swift, :show_invoice_note
+        )
+      ");
+      $params = [];
+    }
+
+    $stmt->execute($params + [
+      ':profile_name' => $data['profile_name'],
+      ':is_default' => (int)$data['is_default'],
+      ':seller_name' => $data['seller_name'],
+      ':seller_registration_no' => $data['seller_registration_no'],
+      ':seller_vat_no' => ($data['seller_vat_no'] === '' ? null : $data['seller_vat_no']),
+      ':seller_address' => $data['seller_address'],
+      ':seller_email' => ($data['seller_email'] === '' ? null : $data['seller_email']),
+      ':seller_phone' => ($data['seller_phone'] === '' ? null : $data['seller_phone']),
+      ':seller_bank_name' => ($data['seller_bank_name'] === '' ? null : $data['seller_bank_name']),
+      ':seller_iban' => ($data['seller_iban'] === '' ? null : $data['seller_iban']),
+      ':seller_swift' => ($data['seller_swift'] === '' ? null : $data['seller_swift']),
+      ':invoice_note' => ($data['invoice_note'] === '' ? null : $data['invoice_note']),
+      ':logo_path' => ($data['logo_path'] === '' ? null : $data['logo_path']),
+      ':show_logo' => (int)$data['show_logo'],
+      ':show_seller_vat_no' => (int)$data['show_seller_vat_no'],
+      ':show_seller_email' => (int)$data['show_seller_email'],
+      ':show_seller_phone' => (int)$data['show_seller_phone'],
+      ':show_seller_bank_name' => (int)$data['show_seller_bank_name'],
+      ':show_seller_iban' => (int)$data['show_seller_iban'],
+      ':show_seller_swift' => (int)$data['show_seller_swift'],
+      ':show_invoice_note' => (int)$data['show_invoice_note'],
+    ]);
+
+    $defaultCount = (int)$pdo->query("SELECT COUNT(*) FROM invoice_profiles WHERE is_default = 1")->fetchColumn();
+    if ($defaultCount === 0) {
+      $pdo->exec("UPDATE invoice_profiles SET is_default = 1 ORDER BY id ASC LIMIT 1");
+    }
+
+    $pdo->commit();
+  } catch (Throwable $e) {
+    if ($pdo->inTransaction()) {
+      $pdo->rollBack();
+    }
+    throw $e;
+  }
+
+  redirect(url('/invoice-settings?saved=1'));
+}
+
+function invoice_settings_default_store(): void
+{
+  $id = (int)($_POST['id'] ?? 0);
+  $profile = invoice_profile_fetch($id);
+  if (!$profile) {
+    invoice_settings_index('Profils nav atrasts.');
+    return;
+  }
+
+  $pdo = db();
+  $pdo->beginTransaction();
+  try {
+    $pdo->exec("UPDATE invoice_profiles SET is_default = 0");
+    $stmt = $pdo->prepare("UPDATE invoice_profiles SET is_default = 1 WHERE id = :id");
+    $stmt->execute([':id' => $id]);
+    $pdo->commit();
+  } catch (Throwable $e) {
+    if ($pdo->inTransaction()) {
+      $pdo->rollBack();
+    }
+    throw $e;
+  }
 
   redirect(url('/invoice-settings?saved=1'));
 }
@@ -210,6 +378,29 @@ function invoice_find_by_job(int $jobId): ?array
   return $stmt->fetch() ?: null;
 }
 
+function invoice_select_profile(array $profiles, int $requestedId = 0): ?array
+{
+  if (!$profiles) {
+    return null;
+  }
+
+  if ($requestedId > 0) {
+    foreach ($profiles as $profile) {
+      if ((int)$profile['id'] === $requestedId) {
+        return $profile;
+      }
+    }
+  }
+
+  foreach ($profiles as $profile) {
+    if ((int)$profile['is_default'] === 1) {
+      return $profile;
+    }
+  }
+
+  return $profiles[0];
+}
+
 function invoice_create_form(): void
 {
   $jobId = (int)($_GET['job_id'] ?? 0);
@@ -231,11 +422,13 @@ function invoice_create_form(): void
     return;
   }
 
-  $settings = invoice_settings_fetch();
+  $profiles = invoice_profiles_fetch_all();
+  $selectedProfile = invoice_select_profile($profiles, (int)($_GET['profile_id'] ?? 0));
   $today = date('Y-m-d');
 
   $form = [
     'job_id' => $jobId,
+    'invoice_profile_id' => $selectedProfile ? (int)$selectedProfile['id'] : 0,
     'payer_type' => 'private_person',
     'payer_name' => $job['client_name'] ?? '',
     'payer_registration_no' => '',
@@ -254,12 +447,13 @@ function invoice_create_form(): void
     'unit_price' => $job['price'] !== null ? (string)$job['price'] : '0.00',
     'vat_rate' => '0',
     'currency' => 'EUR',
-    'notes' => $settings['invoice_note'] ?? '',
+    'notes' => ($selectedProfile && (int)$selectedProfile['show_invoice_note'] === 1) ? ($selectedProfile['invoice_note'] ?? '') : '',
   ];
 
   render('invoice_form.php', [
     'job' => $job,
-    'settings' => $settings,
+    'profiles' => $profiles,
+    'selectedProfile' => $selectedProfile,
     'form' => $form,
     'error' => null,
   ], 'Izveidot rēķinu');
@@ -338,9 +532,13 @@ function invoice_store(): void
     redirect(url('/invoice?id=' . (int)$existing['id']));
   }
 
-  $settings = invoice_settings_fetch();
+  $profiles = invoice_profiles_fetch_all();
+  $profileId = (int)($_POST['invoice_profile_id'] ?? 0);
+  $profile = $profileId > 0 ? invoice_profile_fetch($profileId) : null;
+
   $data = [
     'job_id' => $jobId,
+    'invoice_profile_id' => $profileId,
     'payer_type' => trim($_POST['payer_type'] ?? 'private_person'),
     'payer_name' => trim($_POST['payer_name'] ?? ''),
     'payer_registration_no' => trim($_POST['payer_registration_no'] ?? ''),
@@ -362,16 +560,24 @@ function invoice_store(): void
     'notes' => trim($_POST['notes'] ?? ''),
   ];
 
-  if (
-    trim($settings['seller_name'] ?? '') === '' ||
-    trim($settings['seller_registration_no'] ?? '') === '' ||
-    trim($settings['seller_address'] ?? '') === ''
-  ) {
+  if (!$profile) {
     render('invoice_form.php', [
       'job' => $job,
-      'settings' => $settings,
+      'profiles' => $profiles,
+      'selectedProfile' => null,
       'form' => $data,
-      'error' => 'Vispirms aizpildi rēķinu iestatījumus.',
+      'error' => 'Vispirms izveido rēķina sūtītāja profilu.',
+    ], 'Izveidot rēķinu');
+    return;
+  }
+
+  if (trim($profile['seller_name'] ?? '') === '' || trim($profile['seller_registration_no'] ?? '') === '' || trim($profile['seller_address'] ?? '') === '') {
+    render('invoice_form.php', [
+      'job' => $job,
+      'profiles' => $profiles,
+      'selectedProfile' => $profile,
+      'form' => $data,
+      'error' => 'Izvēlētais rēķina sūtītāja profils nav pilnīgi aizpildīts.',
     ], 'Izveidot rēķinu');
     return;
   }
@@ -380,7 +586,8 @@ function invoice_store(): void
   if ($error) {
     render('invoice_form.php', [
       'job' => $job,
-      'settings' => $settings,
+      'profiles' => $profiles,
+      'selectedProfile' => $profile,
       'form' => $data,
       'error' => $error,
     ], 'Izveidot rēķinu');
@@ -394,6 +601,14 @@ function invoice_store(): void
   $vatAmount = round($subtotal * $vatRate / 100, 2);
   $total = round($subtotal + $vatAmount, 2);
   $year = (int)date('Y', strtotime($data['invoice_date']));
+
+  $sellerVatNo = (int)$profile['show_seller_vat_no'] === 1 ? ($profile['seller_vat_no'] ?? null) : null;
+  $sellerEmail = (int)$profile['show_seller_email'] === 1 ? ($profile['seller_email'] ?? null) : null;
+  $sellerPhone = (int)$profile['show_seller_phone'] === 1 ? ($profile['seller_phone'] ?? null) : null;
+  $sellerBankName = (int)$profile['show_seller_bank_name'] === 1 ? ($profile['seller_bank_name'] ?? null) : null;
+  $sellerIban = (int)$profile['show_seller_iban'] === 1 ? ($profile['seller_iban'] ?? null) : null;
+  $sellerSwift = (int)$profile['show_seller_swift'] === 1 ? ($profile['seller_swift'] ?? null) : null;
+  $sellerLogoPath = (int)$profile['show_logo'] === 1 ? ($profile['logo_path'] ?? null) : null;
 
   $pdo = db();
   for ($attempt = 0; $attempt < 3; $attempt++) {
@@ -430,16 +645,16 @@ function invoice_store(): void
         ':job_id' => $jobId,
         ':invoice_date' => $data['invoice_date'],
         ':due_date' => ($data['due_date'] === '' ? null : $data['due_date']),
-        ':seller_name' => $settings['seller_name'],
-        ':seller_registration_no' => $settings['seller_registration_no'],
-        ':seller_vat_no' => ($settings['seller_vat_no'] === '' ? null : $settings['seller_vat_no']),
-        ':seller_address' => $settings['seller_address'],
-        ':seller_email' => ($settings['seller_email'] === '' ? null : $settings['seller_email']),
-        ':seller_phone' => ($settings['seller_phone'] === '' ? null : $settings['seller_phone']),
-        ':seller_bank_name' => ($settings['seller_bank_name'] === '' ? null : $settings['seller_bank_name']),
-        ':seller_iban' => ($settings['seller_iban'] === '' ? null : $settings['seller_iban']),
-        ':seller_swift' => ($settings['seller_swift'] === '' ? null : $settings['seller_swift']),
-        ':seller_logo_path' => ($settings['logo_path'] === '' ? null : $settings['logo_path']),
+        ':seller_name' => $profile['seller_name'],
+        ':seller_registration_no' => $profile['seller_registration_no'],
+        ':seller_vat_no' => ($sellerVatNo === '' ? null : $sellerVatNo),
+        ':seller_address' => $profile['seller_address'],
+        ':seller_email' => ($sellerEmail === '' ? null : $sellerEmail),
+        ':seller_phone' => ($sellerPhone === '' ? null : $sellerPhone),
+        ':seller_bank_name' => ($sellerBankName === '' ? null : $sellerBankName),
+        ':seller_iban' => ($sellerIban === '' ? null : $sellerIban),
+        ':seller_swift' => ($sellerSwift === '' ? null : $sellerSwift),
+        ':seller_logo_path' => ($sellerLogoPath === '' ? null : $sellerLogoPath),
         ':payer_type' => $data['payer_type'],
         ':payer_name' => $data['payer_name'],
         ':payer_registration_no' => ($data['payer_registration_no'] === '' ? null : $data['payer_registration_no']),
