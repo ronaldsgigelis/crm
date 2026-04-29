@@ -18,16 +18,20 @@
     <form method="post" action="<?= url('/invoice-create') ?>">
       <input type="hidden" name="job_id" value="<?= (int)$form['job_id'] ?>">
 
-      <label>Rēķina sūtītājs</label>
-      <select name="invoice_profile_id" required>
-        <?php foreach ($profiles as $profile): ?>
-          <option
-            value="<?= (int)$profile['id'] ?>"
-            <?= (int)($form['invoice_profile_id'] ?? 0) === (int)$profile['id'] ? 'selected' : '' ?>>
-            <?= h($profile['profile_name']) ?> - <?= h($profile['seller_name']) ?>
-          </option>
-        <?php endforeach; ?>
-      </select>
+      <input type="hidden" name="invoice_profile_id" value="<?= (int)($form['invoice_profile_id'] ?? 0) ?>">
+
+      <p>
+        <strong>Rēķina sūtītājs:</strong>
+        <?= h(($selectedProfile['profile_name'] ?? '') . ' - ' . ($selectedProfile['seller_name'] ?? '')) ?>
+      </p>
+
+      <label>Rēķina numurs</label>
+      <input
+        name="invoice_number"
+        required
+        maxlength="30"
+        placeholder="<?= ($selectedProfile && ($selectedProfile['numbering_type'] ?? '') === 'manual') ? 'Ievadi rēķina numuru' : '' ?>"
+        value="<?= h($form['invoice_number'] ?? '') ?>">
 
       <h2>Maksātājs</h2>
       <div class="row">

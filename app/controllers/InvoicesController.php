@@ -29,7 +29,131 @@ function invoice_profile_defaults(): array
     'show_seller_iban' => 1,
     'show_seller_swift' => 1,
     'show_invoice_note' => 1,
+    'numbering_type' => 'yearly_sequence',
+    'numbering_prefix' => 'R',
+    'numbering_separator' => '-',
+    'numbering_padding' => 4,
   ];
+}
+
+function invoice_number_preview(array $profile): string
+{
+  $type = $profile['numbering_type'] ?? 'yearly_sequence';
+  $prefix = trim((string)($profile['numbering_prefix'] ?? 'R'));
+  $separator = trim((string)($profile['numbering_separator'] ?? '-'));
+  $padding = max(1, min(10, (int)($profile['numbering_padding'] ?? 4)));
+  $sequence = str_pad('1', $padding, '0', STR_PAD_LEFT);
+  $year = date('Y');
+  $date = date('dmY');
+
+  return match ($type) {
+    'daily_sequence' => $prefix . $date . $separator . $sequence,
+    'continuous_sequence' => ($prefix !== '' ? $prefix . $separator : '') . $sequence,
+    'manual' => 'Manuāls numurs',
+    default => ($prefix !== '' ? $prefix . $separator : '') . $year . $separator . $sequence,
+  };
+}
+
+function invoice_numbering_type(array $profile): string
+{
+  $type = $profile['numbering_type'] ?? 'yearly_sequence';
+  return in_array($type, ['yearly_sequence', 'daily_sequence', 'continuous_sequence', 'manual'], true)
+    ? $type
+    : 'yearly_sequence';
+}
+
+function invoice_format_sequence_number(array $profile, string $invoiceDate, int $sequence): string
+{
+  $type = invoice_numbering_type($profile);
+  $prefix = trim((string)($profile['numbering_prefix'] ?? 'R'));
+  $separator = trim((string)($profile['numbering_separator'] ?? '-'));
+  $padding = max(1, min(10, (int)($profile['numbering_padding'] ?? 4)));
+  $paddedSequence = str_pad((string)$sequence, $padding, '0', STR_PAD_LEFT);
+  $date = DateTime::createFromFormat('Y-m-d', $invoiceDate) ?: new DateTime();
+
+  return match ($type) {
+    'daily_sequence' => $prefix . $date->format('dmY') . $separator . $paddedSequence,
+    'continuous_sequence' => ($prefix !== '' ? $prefix . $separator : '') . $paddedSequence,
+    'manual' => '',
+    default => ($prefix !== '' ? $prefix . $separator : '') . $date->format('Y') . $separator . $paddedSequence,
+  };
+}
+
+function invoice_extract_sequence_from_number(string $invoiceNumber, array $profile, string $invoiceDate): ?int
+{
+  $type = invoice_numbering_type($profile);
+  if ($type === 'manual') {
+    return null;
+  }
+
+  $prefix = trim((string)($profile['numbering_prefix'] ?? 'R'));
+  $separator = trim((string)($profile['numbering_separator'] ?? '-'));
+  $date = DateTime::createFromFormat('Y-m-d', $invoiceDate) ?: new DateTime();
+
+  $expectedPrefix = match ($type) {
+    'daily_sequence' => $prefix . $date->format('dmY') . $separator,
+    'continuous_sequence' => $prefix !== '' ? $prefix . $separator : '',
+    default => ($prefix !== '' ? $prefix . $separator : '') . $date->format('Y') . $separator,
+  };
+
+  if (!preg_match('/^' . preg_quote($expectedPrefix, '/') . '(\d+)$/', $invoiceNumber, $matches)) {
+    return null;
+  }
+
+  return (int)$matches[1];
+}
+
+function invoice_number_exists(string $invoiceNumber): bool
+{
+  $stmt = db()->prepare("SELECT 1 FROM invoices WHERE invoice_number = :invoice_number LIMIT 1");
+  $stmt->execute([':invoice_number' => $invoiceNumber]);
+
+  return (bool)$stmt->fetchColumn();
+}
+
+function invoice_generate_next_number(array $profile, string $invoiceDate): string
+{
+  if (invoice_numbering_type($profile) === 'manual') {
+    return '';
+  }
+
+  $profileId = (int)($profile['id'] ?? 0);
+  $date = DateTime::createFromFormat('Y-m-d', $invoiceDate) ?: new DateTime();
+  $params = [':profile_id' => $profileId];
+
+  if (invoice_numbering_type($profile) === 'yearly_sequence') {
+    $where = 'invoice_profile_id = :profile_id AND YEAR(invoice_date) = :invoice_year';
+    $params[':invoice_year'] = $date->format('Y');
+  } elseif (invoice_numbering_type($profile) === 'daily_sequence') {
+    $where = 'invoice_profile_id = :profile_id AND invoice_date = :invoice_date';
+    $params[':invoice_date'] = $date->format('Y-m-d');
+  } else {
+    $where = 'invoice_profile_id = :profile_id';
+  }
+
+  $stmt = db()->prepare("
+    SELECT invoice_number
+    FROM invoices
+    WHERE {$where}
+    ORDER BY id ASC
+  ");
+  $stmt->execute($params);
+
+  $highest = 0;
+  foreach ($stmt->fetchAll() as $row) {
+    $sequence = invoice_extract_sequence_from_number((string)$row['invoice_number'], $profile, $date->format('Y-m-d'));
+    if ($sequence !== null && $sequence > $highest) {
+      $highest = $sequence;
+    }
+  }
+
+  $next = $highest + 1;
+  do {
+    $invoiceNumber = invoice_format_sequence_number($profile, $date->format('Y-m-d'), $next);
+    $next++;
+  } while (invoice_number_exists($invoiceNumber));
+
+  return $invoiceNumber;
 }
 
 function invoice_profiles_fetch_all(): array
@@ -153,10 +277,19 @@ function invoice_profile_post_data(array $existing = []): array
   foreach ([
     'profile_name', 'seller_name', 'seller_registration_no', 'seller_vat_no',
     'seller_address', 'seller_email', 'seller_phone', 'seller_bank_name',
-    'seller_iban', 'seller_swift', 'invoice_note',
+    'seller_iban', 'seller_swift', 'invoice_note', 'numbering_type',
+    'numbering_prefix', 'numbering_separator',
   ] as $field) {
     $data[$field] = trim($_POST[$field] ?? '');
   }
+
+  $allowedNumberingTypes = ['yearly_sequence', 'daily_sequence', 'continuous_sequence', 'manual'];
+  if (!in_array($data['numbering_type'], $allowedNumberingTypes, true)) {
+    $data['numbering_type'] = 'yearly_sequence';
+  }
+
+  $padding = (int)($_POST['numbering_padding'] ?? 4);
+  $data['numbering_padding'] = max(1, min(10, $padding));
 
   foreach ([
     'is_default', 'show_logo', 'show_seller_vat_no', 'show_seller_email',
@@ -249,7 +382,11 @@ function invoice_settings_store(): void
             show_seller_bank_name = :show_seller_bank_name,
             show_seller_iban = :show_seller_iban,
             show_seller_swift = :show_seller_swift,
-            show_invoice_note = :show_invoice_note
+            show_invoice_note = :show_invoice_note,
+            numbering_type = :numbering_type,
+            numbering_prefix = :numbering_prefix,
+            numbering_separator = :numbering_separator,
+            numbering_padding = :numbering_padding
         WHERE id = :id
       ");
       $params = [':id' => $id];
@@ -260,13 +397,15 @@ function invoice_settings_store(): void
           seller_address, seller_email, seller_phone, seller_bank_name, seller_iban,
           seller_swift, invoice_note, logo_path, show_logo, show_seller_vat_no,
           show_seller_email, show_seller_phone, show_seller_bank_name, show_seller_iban,
-          show_seller_swift, show_invoice_note
+          show_seller_swift, show_invoice_note, numbering_type, numbering_prefix,
+          numbering_separator, numbering_padding
         ) VALUES (
           :profile_name, :is_default, :seller_name, :seller_registration_no, :seller_vat_no,
           :seller_address, :seller_email, :seller_phone, :seller_bank_name, :seller_iban,
           :seller_swift, :invoice_note, :logo_path, :show_logo, :show_seller_vat_no,
           :show_seller_email, :show_seller_phone, :show_seller_bank_name, :show_seller_iban,
-          :show_seller_swift, :show_invoice_note
+          :show_seller_swift, :show_invoice_note, :numbering_type, :numbering_prefix,
+          :numbering_separator, :numbering_padding
         )
       ");
       $params = [];
@@ -294,6 +433,10 @@ function invoice_settings_store(): void
       ':show_seller_iban' => (int)$data['show_seller_iban'],
       ':show_seller_swift' => (int)$data['show_seller_swift'],
       ':show_invoice_note' => (int)$data['show_invoice_note'],
+      ':numbering_type' => $data['numbering_type'],
+      ':numbering_prefix' => ($data['numbering_prefix'] === '' ? null : $data['numbering_prefix']),
+      ':numbering_separator' => ($data['numbering_separator'] === '' ? null : $data['numbering_separator']),
+      ':numbering_padding' => (int)$data['numbering_padding'],
     ]);
 
     $defaultCount = (int)$pdo->query("SELECT COUNT(*) FROM invoice_profiles WHERE is_default = 1")->fetchColumn();
@@ -424,12 +567,14 @@ function invoice_create_form(): void
   }
 
   $profiles = invoice_profiles_fetch_all();
-  $selectedProfile = invoice_select_profile($profiles, (int)($_GET['profile_id'] ?? 0));
+  $selectedProfile = invoice_select_profile($profiles);
   $today = date('Y-m-d');
+  $invoiceNumber = $selectedProfile ? invoice_generate_next_number($selectedProfile, $today) : '';
 
   $form = [
     'job_id' => $jobId,
     'invoice_profile_id' => $selectedProfile ? (int)$selectedProfile['id'] : 0,
+    'invoice_number' => $invoiceNumber,
     'payer_type' => 'private_person',
     'payer_name' => $job['client_name'] ?? '',
     'payer_registration_no' => '',
@@ -534,12 +679,13 @@ function invoice_store(): void
   }
 
   $profiles = invoice_profiles_fetch_all();
-  $profileId = (int)($_POST['invoice_profile_id'] ?? 0);
-  $profile = $profileId > 0 ? invoice_profile_fetch($profileId) : null;
+  $profile = invoice_select_profile($profiles);
+  $profileId = $profile ? (int)$profile['id'] : 0;
 
   $data = [
     'job_id' => $jobId,
     'invoice_profile_id' => $profileId,
+    'invoice_number' => trim($_POST['invoice_number'] ?? ''),
     'payer_type' => trim($_POST['payer_type'] ?? 'private_person'),
     'payer_name' => trim($_POST['payer_name'] ?? ''),
     'payer_registration_no' => trim($_POST['payer_registration_no'] ?? ''),
@@ -595,13 +741,40 @@ function invoice_store(): void
     return;
   }
 
+  $invoiceNumber = $data['invoice_number'];
+  if ($invoiceNumber === '') {
+    if (invoice_numbering_type($profile) === 'manual') {
+      render('invoice_form.php', [
+        'job' => $job,
+        'profiles' => $profiles,
+        'selectedProfile' => $profile,
+        'form' => $data,
+        'error' => 'Ievadi rēķina numuru.',
+      ], 'Izveidot rēķinu');
+      return;
+    }
+
+    $invoiceNumber = invoice_generate_next_number($profile, $data['invoice_date']);
+    $data['invoice_number'] = $invoiceNumber;
+  }
+
+  if (invoice_number_exists($invoiceNumber)) {
+    render('invoice_form.php', [
+      'job' => $job,
+      'profiles' => $profiles,
+      'selectedProfile' => $profile,
+      'form' => $data,
+      'error' => 'Šāds rēķina numurs jau eksistē.',
+    ], 'Izveidot rēķinu');
+    return;
+  }
+
   $quantity = round((float)$data['quantity'], 2);
   $unitPrice = round((float)$data['unit_price'], 2);
   $vatRate = round((float)$data['vat_rate'], 2);
   $subtotal = round($quantity * $unitPrice, 2);
   $vatAmount = round($subtotal * $vatRate / 100, 2);
   $total = round($subtotal + $vatAmount, 2);
-  $year = (int)date('Y', strtotime($data['invoice_date']));
 
   $sellerVatNo = (int)$profile['show_seller_vat_no'] === 1 ? ($profile['seller_vat_no'] ?? null) : null;
   $sellerEmail = (int)$profile['show_seller_email'] === 1 ? ($profile['seller_email'] ?? null) : null;
@@ -615,11 +788,10 @@ function invoice_store(): void
   for ($attempt = 0; $attempt < 3; $attempt++) {
     try {
       $pdo->beginTransaction();
-      $invoiceNumber = invoice_next_number($pdo, $year);
 
       $stmt = $pdo->prepare("
         INSERT INTO invoices (
-          invoice_number, job_id, invoice_date, due_date,
+          invoice_number, job_id, invoice_profile_id, invoice_date, due_date,
           seller_name, seller_registration_no, seller_vat_no, seller_address,
           seller_email, seller_phone, seller_bank_name, seller_iban, seller_swift,
           seller_logo_path,
@@ -629,7 +801,7 @@ function invoice_store(): void
           service_description, quantity, unit, unit_price, vat_rate,
           subtotal, vat_amount, total, currency, notes
         ) VALUES (
-          :invoice_number, :job_id, :invoice_date, :due_date,
+          :invoice_number, :job_id, :invoice_profile_id, :invoice_date, :due_date,
           :seller_name, :seller_registration_no, :seller_vat_no, :seller_address,
           :seller_email, :seller_phone, :seller_bank_name, :seller_iban, :seller_swift,
           :seller_logo_path,
@@ -644,6 +816,7 @@ function invoice_store(): void
       $stmt->execute([
         ':invoice_number' => $invoiceNumber,
         ':job_id' => $jobId,
+        ':invoice_profile_id' => $profileId,
         ':invoice_date' => $data['invoice_date'],
         ':due_date' => ($data['due_date'] === '' ? null : $data['due_date']),
         ':seller_name' => $profile['seller_name'],
@@ -686,12 +859,20 @@ function invoice_store(): void
         $pdo->rollBack();
       }
 
-      if (str_contains($e->getMessage(), 'Duplicate') && $attempt < 2) {
+      if (str_contains($e->getMessage(), 'Duplicate')) {
         $existingAfterDuplicate = invoice_find_by_job($jobId);
         if ($existingAfterDuplicate) {
           redirect(url('/invoice?id=' . (int)$existingAfterDuplicate['id']));
         }
-        continue;
+
+        render('invoice_form.php', [
+          'job' => $job,
+          'profiles' => $profiles,
+          'selectedProfile' => $profile,
+          'form' => $data,
+          'error' => 'Šāds rēķina numurs jau eksistē.',
+        ], 'Izveidot rēķinu');
+        return;
       }
 
       throw $e;

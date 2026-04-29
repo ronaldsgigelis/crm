@@ -37,6 +37,10 @@ CREATE TABLE IF NOT EXISTS invoice_profiles (
   show_seller_iban TINYINT(1) NOT NULL DEFAULT 1,
   show_seller_swift TINYINT(1) NOT NULL DEFAULT 1,
   show_invoice_note TINYINT(1) NOT NULL DEFAULT 1,
+  numbering_type VARCHAR(50) NOT NULL DEFAULT 'yearly_sequence',
+  numbering_prefix VARCHAR(50) NULL DEFAULT 'R',
+  numbering_separator VARCHAR(10) NULL DEFAULT '-',
+  numbering_padding INT NOT NULL DEFAULT 4,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB;
@@ -45,6 +49,7 @@ CREATE TABLE IF NOT EXISTS invoices (
   id INT AUTO_INCREMENT PRIMARY KEY,
   invoice_number VARCHAR(30) NOT NULL,
   job_id INT NULL,
+  invoice_profile_id INT NULL,
   invoice_date DATE NOT NULL,
   due_date DATE NULL,
   seller_name VARCHAR(160) NOT NULL,
@@ -80,5 +85,6 @@ CREATE TABLE IF NOT EXISTS invoices (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY uq_invoices_invoice_number (invoice_number),
   UNIQUE KEY uq_invoices_job_id (job_id),
-  CONSTRAINT fk_invoices_job FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE SET NULL ON UPDATE CASCADE
+  CONSTRAINT fk_invoices_job FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT fk_invoices_profile FOREIGN KEY (invoice_profile_id) REFERENCES invoice_profiles(id) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE = InnoDB;
