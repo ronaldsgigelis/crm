@@ -545,6 +545,420 @@ function invoice_select_profile(array $profiles, int $requestedId = 0): ?array
   return $profiles[0];
 }
 
+function invoice_templates_fetch_all(): array
+{
+  try {
+    return db()->query("
+      SELECT id, template_name, invoice_profile_id, payer_name, service_description,
+             quantity, unit_price, currency, created_at
+      FROM invoice_templates
+      ORDER BY template_name ASC, id DESC
+    ")->fetchAll();
+  } catch (PDOException $e) {
+    return [];
+  }
+}
+
+function invoice_template_fetch(int $id): ?array
+{
+  if ($id <= 0) {
+    return null;
+  }
+
+  try {
+    $stmt = db()->prepare("SELECT * FROM invoice_templates WHERE id = :id LIMIT 1");
+    $stmt->execute([':id' => $id]);
+
+    return $stmt->fetch() ?: null;
+  } catch (PDOException $e) {
+    return null;
+  }
+}
+
+function invoice_template_store(array $data, int $templateId = 0): int
+{
+  if ($templateId > 0) {
+    $stmt = db()->prepare("
+      UPDATE invoice_templates
+      SET template_name = :template_name,
+          invoice_profile_id = :invoice_profile_id,
+          payer_type = :payer_type,
+          payer_name = :payer_name,
+          payer_registration_no = :payer_registration_no,
+          payer_vat_no = :payer_vat_no,
+          payer_address = :payer_address,
+          payer_email = :payer_email,
+          payer_phone = :payer_phone,
+          service_receiver_name = :service_receiver_name,
+          service_receiver_address = :service_receiver_address,
+          service_receiver_notes = :service_receiver_notes,
+          service_description = :service_description,
+          quantity = :quantity,
+          unit = :unit,
+          unit_price = :unit_price,
+          vat_rate = :vat_rate,
+          currency = :currency,
+          notes = :notes
+      WHERE id = :id
+    ");
+  } else {
+    $stmt = db()->prepare("
+      INSERT INTO invoice_templates (
+        template_name, invoice_profile_id,
+        payer_type, payer_name, payer_registration_no, payer_vat_no, payer_address,
+        payer_email, payer_phone,
+        service_receiver_name, service_receiver_address, service_receiver_notes,
+        service_description, quantity, unit, unit_price, vat_rate, currency, notes
+      ) VALUES (
+        :template_name, :invoice_profile_id,
+        :payer_type, :payer_name, :payer_registration_no, :payer_vat_no, :payer_address,
+        :payer_email, :payer_phone,
+        :service_receiver_name, :service_receiver_address, :service_receiver_notes,
+        :service_description, :quantity, :unit, :unit_price, :vat_rate, :currency, :notes
+      )
+    ");
+  }
+
+  $params = [
+    ':template_name' => $data['template_name'],
+    ':invoice_profile_id' => (int)$data['invoice_profile_id'] > 0 ? (int)$data['invoice_profile_id'] : null,
+    ':payer_type' => $data['payer_type'],
+    ':payer_name' => $data['payer_name'],
+    ':payer_registration_no' => $data['payer_registration_no'] === '' ? null : $data['payer_registration_no'],
+    ':payer_vat_no' => $data['payer_vat_no'] === '' ? null : $data['payer_vat_no'],
+    ':payer_address' => $data['payer_address'] === '' ? null : $data['payer_address'],
+    ':payer_email' => $data['payer_email'] === '' ? null : $data['payer_email'],
+    ':payer_phone' => $data['payer_phone'] === '' ? null : $data['payer_phone'],
+    ':service_receiver_name' => $data['service_receiver_name'] === '' ? null : $data['service_receiver_name'],
+    ':service_receiver_address' => $data['service_receiver_address'] === '' ? null : $data['service_receiver_address'],
+    ':service_receiver_notes' => $data['service_receiver_notes'] === '' ? null : $data['service_receiver_notes'],
+    ':service_description' => $data['service_description'],
+    ':quantity' => round((float)$data['quantity'], 2),
+    ':unit' => $data['unit'] === '' ? 'gab.' : $data['unit'],
+    ':unit_price' => round((float)$data['unit_price'], 2),
+    ':vat_rate' => round((float)$data['vat_rate'], 2),
+    ':currency' => $data['currency'],
+    ':notes' => $data['notes'] === '' ? null : $data['notes'],
+  ];
+
+  if ($templateId > 0) {
+    $params[':id'] = $templateId;
+  }
+
+  $stmt->execute($params);
+
+  return $templateId > 0 ? $templateId : (int)db()->lastInsertId();
+}
+
+function manual_invoice_default_form(?array $template, ?array $selectedProfile): array
+{
+  $today = date('Y-m-d');
+
+  return [
+    'invoice_profile_id' => $template ? (int)($template['invoice_profile_id'] ?? 0) : ($selectedProfile ? (int)$selectedProfile['id'] : 0),
+    'invoice_number' => '',
+    'payer_type' => $template['payer_type'] ?? 'private_person',
+    'payer_name' => $template['payer_name'] ?? '',
+    'payer_registration_no' => $template['payer_registration_no'] ?? '',
+    'payer_vat_no' => $template['payer_vat_no'] ?? '',
+    'payer_address' => $template['payer_address'] ?? '',
+    'payer_email' => $template['payer_email'] ?? '',
+    'payer_phone' => $template['payer_phone'] ?? '',
+    'service_receiver_name' => $template['service_receiver_name'] ?? '',
+    'service_receiver_address' => $template['service_receiver_address'] ?? '',
+    'service_receiver_notes' => $template['service_receiver_notes'] ?? '',
+    'invoice_date' => $today,
+    'due_date' => date('Y-m-d', strtotime($today . ' +14 days')),
+    'service_description' => $template['service_description'] ?? '',
+    'quantity' => isset($template['quantity']) ? (string)$template['quantity'] : '1',
+    'unit' => $template['unit'] ?? 'gab.',
+    'unit_price' => isset($template['unit_price']) ? (string)$template['unit_price'] : '0.00',
+    'vat_rate' => isset($template['vat_rate']) ? (string)$template['vat_rate'] : '0',
+    'currency' => $template['currency'] ?? 'EUR',
+    'notes' => $template['notes'] ?? (($selectedProfile && (int)$selectedProfile['show_invoice_note'] === 1) ? ($selectedProfile['invoice_note'] ?? '') : ''),
+    'template_id' => $template ? (int)($template['id'] ?? 0) : 0,
+    'template_name' => $template['template_name'] ?? '',
+  ];
+}
+
+function manual_invoice_post_data(): array
+{
+  return [
+    'invoice_profile_id' => (int)($_POST['invoice_profile_id'] ?? 0),
+    'invoice_number' => trim($_POST['invoice_number'] ?? ''),
+    'payer_type' => trim($_POST['payer_type'] ?? 'private_person'),
+    'payer_name' => trim($_POST['payer_name'] ?? ''),
+    'payer_registration_no' => trim($_POST['payer_registration_no'] ?? ''),
+    'payer_vat_no' => trim($_POST['payer_vat_no'] ?? ''),
+    'payer_address' => trim($_POST['payer_address'] ?? ''),
+    'payer_email' => trim($_POST['payer_email'] ?? ''),
+    'payer_phone' => trim($_POST['payer_phone'] ?? ''),
+    'service_receiver_name' => trim($_POST['service_receiver_name'] ?? ''),
+    'service_receiver_address' => trim($_POST['service_receiver_address'] ?? ''),
+    'service_receiver_notes' => trim($_POST['service_receiver_notes'] ?? ''),
+    'invoice_date' => trim($_POST['invoice_date'] ?? ''),
+    'due_date' => trim($_POST['due_date'] ?? ''),
+    'service_description' => trim($_POST['service_description'] ?? ''),
+    'quantity' => trim($_POST['quantity'] ?? '1'),
+    'unit' => trim($_POST['unit'] ?? 'gab.'),
+    'unit_price' => trim($_POST['unit_price'] ?? ''),
+    'vat_rate' => trim($_POST['vat_rate'] ?? '0'),
+    'currency' => trim($_POST['currency'] ?? 'EUR') ?: 'EUR',
+    'notes' => trim($_POST['notes'] ?? ''),
+    'action' => trim($_POST['action'] ?? 'generate_invoice'),
+    'template_id' => (int)($_POST['template_id'] ?? 0),
+    'template_name' => trim($_POST['template_name'] ?? ''),
+  ];
+}
+
+function manual_invoice_build_preview(array $data, array $profile, string $invoiceNumber): array
+{
+  $quantity = round((float)$data['quantity'], 2);
+  $unitPrice = round((float)$data['unit_price'], 2);
+  $vatRate = round((float)$data['vat_rate'], 2);
+  $subtotal = round($quantity * $unitPrice, 2);
+  $vatAmount = round($subtotal * $vatRate / 100, 2);
+  $total = round($subtotal + $vatAmount, 2);
+
+  $sellerVatNo = (int)$profile['show_seller_vat_no'] === 1 ? ($profile['seller_vat_no'] ?? null) : null;
+  $sellerEmail = (int)$profile['show_seller_email'] === 1 ? ($profile['seller_email'] ?? null) : null;
+  $sellerPhone = (int)$profile['show_seller_phone'] === 1 ? ($profile['seller_phone'] ?? null) : null;
+  $sellerBankName = (int)$profile['show_seller_bank_name'] === 1 ? ($profile['seller_bank_name'] ?? null) : null;
+  $sellerIban = (int)$profile['show_seller_iban'] === 1 ? ($profile['seller_iban'] ?? null) : null;
+  $sellerSwift = (int)$profile['show_seller_swift'] === 1 ? ($profile['seller_swift'] ?? null) : null;
+  $sellerLogoPath = (int)$profile['show_logo'] === 1 ? ($profile['logo_path'] ?? null) : null;
+
+  return [
+    'invoice_number' => $invoiceNumber,
+    'invoice_date' => $data['invoice_date'],
+    'due_date' => ($data['due_date'] === '' ? null : $data['due_date']),
+    'seller_name' => $profile['seller_name'],
+    'seller_registration_no' => $profile['seller_registration_no'],
+    'seller_vat_no' => ($sellerVatNo === '' ? null : $sellerVatNo),
+    'seller_address' => $profile['seller_address'],
+    'seller_email' => ($sellerEmail === '' ? null : $sellerEmail),
+    'seller_phone' => ($sellerPhone === '' ? null : $sellerPhone),
+    'seller_bank_name' => ($sellerBankName === '' ? null : $sellerBankName),
+    'seller_iban' => ($sellerIban === '' ? null : $sellerIban),
+    'seller_swift' => ($sellerSwift === '' ? null : $sellerSwift),
+    'seller_logo_path' => ($sellerLogoPath === '' ? null : $sellerLogoPath),
+    'payer_type' => $data['payer_type'],
+    'payer_name' => $data['payer_name'],
+    'payer_registration_no' => ($data['payer_registration_no'] === '' ? null : $data['payer_registration_no']),
+    'payer_vat_no' => ($data['payer_vat_no'] === '' ? null : $data['payer_vat_no']),
+    'payer_address' => ($data['payer_address'] === '' ? null : $data['payer_address']),
+    'payer_email' => ($data['payer_email'] === '' ? null : $data['payer_email']),
+    'payer_phone' => ($data['payer_phone'] === '' ? null : $data['payer_phone']),
+    'service_receiver_name' => ($data['service_receiver_name'] === '' ? null : $data['service_receiver_name']),
+    'service_receiver_address' => ($data['service_receiver_address'] === '' ? null : $data['service_receiver_address']),
+    'service_receiver_notes' => ($data['service_receiver_notes'] === '' ? null : $data['service_receiver_notes']),
+    'service_description' => $data['service_description'],
+    'quantity' => $quantity,
+    'unit' => ($data['unit'] === '' ? 'gab.' : $data['unit']),
+    'unit_price' => $unitPrice,
+    'vat_rate' => $vatRate,
+    'subtotal' => $subtotal,
+    'vat_amount' => $vatAmount,
+    'total' => $total,
+    'currency' => $data['currency'],
+    'notes' => ($data['notes'] === '' ? null : $data['notes']),
+  ];
+}
+
+function manual_invoice_form(?string $error = null, ?array $form = null, ?array $previewInvoice = null): void
+{
+  $profiles = invoice_profiles_fetch_all();
+  $templates = invoice_templates_fetch_all();
+  $templateId = $form ? (int)($form['template_id'] ?? 0) : (int)($_GET['template_id'] ?? 0);
+  $selectedTemplate = $templateId > 0 ? invoice_template_fetch($templateId) : null;
+  $requestedProfileId = $form ? (int)($form['invoice_profile_id'] ?? 0) : (int)($selectedTemplate['invoice_profile_id'] ?? 0);
+  $selectedProfile = invoice_select_profile($profiles, $requestedProfileId);
+
+  if (!$form) {
+    $form = manual_invoice_default_form($selectedTemplate, $selectedProfile);
+    if ($selectedProfile) {
+      $form['invoice_profile_id'] = (int)$selectedProfile['id'];
+    }
+  }
+
+  $generatedNumber = '';
+  if ($selectedProfile && invoice_numbering_type($selectedProfile) !== 'manual' && !empty($form['invoice_date'])) {
+    $generatedNumber = invoice_generate_next_number($selectedProfile, $form['invoice_date']);
+  }
+
+  render('manual_invoice_form.php', [
+    'profiles' => $profiles,
+    'templates' => $templates,
+    'selectedTemplate' => $selectedTemplate,
+    'selectedProfile' => $selectedProfile,
+    'form' => $form,
+    'generatedNumber' => $generatedNumber,
+    'previewInvoice' => $previewInvoice,
+    'templateSaved' => (int)($_GET['template_saved'] ?? 0) === 1,
+    'error' => $error,
+  ], 'Manuāls rēķins');
+}
+
+function manual_invoice_store(): void
+{
+  $profiles = invoice_profiles_fetch_all();
+  $data = manual_invoice_post_data();
+  $profile = invoice_select_profile($profiles, (int)$data['invoice_profile_id']);
+  if ($profile) {
+    $data['invoice_profile_id'] = (int)$profile['id'];
+  }
+
+  if (!$profile) {
+    manual_invoice_form('Vispirms izveido rēķina sūtītāja profilu.', $data);
+    return;
+  }
+
+  if (trim($profile['seller_name'] ?? '') === '' || trim($profile['seller_registration_no'] ?? '') === '' || trim($profile['seller_address'] ?? '') === '') {
+    manual_invoice_form('Izvēlētais rēķina sūtītāja profils nav pilnīgi aizpildīts.', $data);
+    return;
+  }
+
+  $error = invoice_validate_form($data);
+  if ($error) {
+    manual_invoice_form($error, $data);
+    return;
+  }
+
+  if ($data['action'] === 'save_template') {
+    $templateId = (int)$data['template_id'];
+    if ($templateId <= 0 && $data['template_name'] === '') {
+      manual_invoice_form('Sagataves nosaukums ir obligāts.', $data);
+      return;
+    }
+
+    $existingTemplate = $templateId > 0 ? invoice_template_fetch($templateId) : null;
+    if ($existingTemplate && $data['template_name'] === '') {
+      $data['template_name'] = $existingTemplate['template_name'];
+    }
+
+    try {
+      $savedTemplateId = invoice_template_store($data, $existingTemplate ? $templateId : 0);
+      redirect(url('/manual-invoice?template_id=' . $savedTemplateId . '&template_saved=1'));
+    } catch (PDOException $e) {
+      manual_invoice_form('Sagatavi neizdevās saglabāt.', $data);
+      return;
+    }
+  }
+
+  if ($data['action'] === 'preview_invoice') {
+    $previewNumber = $data['invoice_number'] !== '' ? $data['invoice_number'] : invoice_generate_next_number($profile, $data['invoice_date']);
+    if ($previewNumber === '') {
+      $previewNumber = 'Priekšskatījums';
+    }
+    manual_invoice_form(null, $data, manual_invoice_build_preview($data, $profile, $previewNumber));
+    return;
+  }
+
+  $invoiceNumber = $data['invoice_number'];
+  if ($invoiceNumber === '') {
+    if (invoice_numbering_type($profile) === 'manual') {
+      manual_invoice_form('Ievadi rēķina numuru.', $data);
+      return;
+    }
+
+    $invoiceNumber = invoice_generate_next_number($profile, $data['invoice_date']);
+    $data['invoice_number'] = $invoiceNumber;
+  }
+
+  if (invoice_number_exists($invoiceNumber)) {
+    manual_invoice_form('Šāds rēķina numurs jau eksistē.', $data);
+    return;
+  }
+
+  $quantity = round((float)$data['quantity'], 2);
+  $unitPrice = round((float)$data['unit_price'], 2);
+  $vatRate = round((float)$data['vat_rate'], 2);
+  $subtotal = round($quantity * $unitPrice, 2);
+  $vatAmount = round($subtotal * $vatRate / 100, 2);
+  $total = round($subtotal + $vatAmount, 2);
+
+  $sellerVatNo = (int)$profile['show_seller_vat_no'] === 1 ? ($profile['seller_vat_no'] ?? null) : null;
+  $sellerEmail = (int)$profile['show_seller_email'] === 1 ? ($profile['seller_email'] ?? null) : null;
+  $sellerPhone = (int)$profile['show_seller_phone'] === 1 ? ($profile['seller_phone'] ?? null) : null;
+  $sellerBankName = (int)$profile['show_seller_bank_name'] === 1 ? ($profile['seller_bank_name'] ?? null) : null;
+  $sellerIban = (int)$profile['show_seller_iban'] === 1 ? ($profile['seller_iban'] ?? null) : null;
+  $sellerSwift = (int)$profile['show_seller_swift'] === 1 ? ($profile['seller_swift'] ?? null) : null;
+  $sellerLogoPath = (int)$profile['show_logo'] === 1 ? ($profile['logo_path'] ?? null) : null;
+
+  try {
+    $stmt = db()->prepare("
+      INSERT INTO invoices (
+        invoice_number, job_id, invoice_profile_id, invoice_date, due_date,
+        seller_name, seller_registration_no, seller_vat_no, seller_address,
+        seller_email, seller_phone, seller_bank_name, seller_iban, seller_swift,
+        seller_logo_path,
+        payer_type, payer_name, payer_registration_no, payer_vat_no, payer_address,
+        payer_email, payer_phone,
+        service_receiver_name, service_receiver_address, service_receiver_notes,
+        service_description, quantity, unit, unit_price, vat_rate,
+        subtotal, vat_amount, total, currency, notes
+      ) VALUES (
+        :invoice_number, :job_id, :invoice_profile_id, :invoice_date, :due_date,
+        :seller_name, :seller_registration_no, :seller_vat_no, :seller_address,
+        :seller_email, :seller_phone, :seller_bank_name, :seller_iban, :seller_swift,
+        :seller_logo_path,
+        :payer_type, :payer_name, :payer_registration_no, :payer_vat_no, :payer_address,
+        :payer_email, :payer_phone,
+        :service_receiver_name, :service_receiver_address, :service_receiver_notes,
+        :service_description, :quantity, :unit, :unit_price, :vat_rate,
+        :subtotal, :vat_amount, :total, :currency, :notes
+      )
+    ");
+
+    $stmt->execute([
+      ':invoice_number' => $invoiceNumber,
+      ':job_id' => null,
+      ':invoice_profile_id' => (int)$profile['id'],
+      ':invoice_date' => $data['invoice_date'],
+      ':due_date' => ($data['due_date'] === '' ? null : $data['due_date']),
+      ':seller_name' => $profile['seller_name'],
+      ':seller_registration_no' => $profile['seller_registration_no'],
+      ':seller_vat_no' => ($sellerVatNo === '' ? null : $sellerVatNo),
+      ':seller_address' => $profile['seller_address'],
+      ':seller_email' => ($sellerEmail === '' ? null : $sellerEmail),
+      ':seller_phone' => ($sellerPhone === '' ? null : $sellerPhone),
+      ':seller_bank_name' => ($sellerBankName === '' ? null : $sellerBankName),
+      ':seller_iban' => ($sellerIban === '' ? null : $sellerIban),
+      ':seller_swift' => ($sellerSwift === '' ? null : $sellerSwift),
+      ':seller_logo_path' => ($sellerLogoPath === '' ? null : $sellerLogoPath),
+      ':payer_type' => $data['payer_type'],
+      ':payer_name' => $data['payer_name'],
+      ':payer_registration_no' => ($data['payer_registration_no'] === '' ? null : $data['payer_registration_no']),
+      ':payer_vat_no' => ($data['payer_vat_no'] === '' ? null : $data['payer_vat_no']),
+      ':payer_address' => ($data['payer_address'] === '' ? null : $data['payer_address']),
+      ':payer_email' => ($data['payer_email'] === '' ? null : $data['payer_email']),
+      ':payer_phone' => ($data['payer_phone'] === '' ? null : $data['payer_phone']),
+      ':service_receiver_name' => ($data['service_receiver_name'] === '' ? null : $data['service_receiver_name']),
+      ':service_receiver_address' => ($data['service_receiver_address'] === '' ? null : $data['service_receiver_address']),
+      ':service_receiver_notes' => ($data['service_receiver_notes'] === '' ? null : $data['service_receiver_notes']),
+      ':service_description' => $data['service_description'],
+      ':quantity' => $quantity,
+      ':unit' => ($data['unit'] === '' ? 'gab.' : $data['unit']),
+      ':unit_price' => $unitPrice,
+      ':vat_rate' => $vatRate,
+      ':subtotal' => $subtotal,
+      ':vat_amount' => $vatAmount,
+      ':total' => $total,
+      ':currency' => $data['currency'],
+      ':notes' => ($data['notes'] === '' ? null : $data['notes']),
+    ]);
+
+    redirect(url('/invoice?id=' . (int)db()->lastInsertId()));
+  } catch (PDOException $e) {
+    if (str_contains($e->getMessage(), 'Duplicate')) {
+      manual_invoice_form('Šāds rēķina numurs jau eksistē.', $data);
+      return;
+    }
+
+    throw $e;
+  }
+}
+
 function invoice_create_form(): void
 {
   $jobId = (int)($_GET['job_id'] ?? 0);
