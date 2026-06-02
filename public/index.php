@@ -7,6 +7,7 @@ require_once __DIR__ . '/../app/helpers.php';
 require_once __DIR__ . '/../app/routes.php';
 
 // Kontrolieri
+require_once __DIR__ . '/../app/controllers/DashboardController.php';
 require_once __DIR__ . '/../app/controllers/ClientsController.php';
 require_once __DIR__ . '/../app/controllers/JobsController.php';
 require_once __DIR__ . '/../app/controllers/MastersController.php';
@@ -14,9 +15,7 @@ require_once __DIR__ . '/../app/controllers/InvoicesController.php';
 
 // Sākumlapa
 if (is_route('GET', '/')) {
-  $title = 'CRM';
-  $content = '<p class="muted">CRM sākums</p>';
-  require __DIR__ . '/../views/layout.php';
+  dashboard_index();
   exit;
 }
 
