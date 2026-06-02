@@ -126,6 +126,10 @@ if (is_route('POST', '/invoice-delete')) {
   invoice_delete();
   exit;
 }
+if (is_route('POST', '/invoice-payment-status')) {
+  invoice_payment_status_update();
+  exit;
+}
 if (is_route('GET', '/invoice-pdf')) {
   invoice_pdf();
   exit;
