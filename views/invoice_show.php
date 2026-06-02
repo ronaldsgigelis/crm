@@ -19,7 +19,7 @@
     <?php endif; ?>
 
     <?php if (!empty($invoice['job_id'])): ?>
-      <p><a href="<?= url('/job?id=' . (int)$invoice['job_id']) ?>">Atvērt saistīto darbu</a></p>
+      <p><a class="btn btn-secondary" href="<?= url('/job?id=' . (int)$invoice['job_id']) ?>">Atvērt saistīto darbu</a></p>
     <?php endif; ?>
 
     <p><strong>Apmaksa:</strong> <?= h(invoice_payment_status_label($invoice)) ?></p>
@@ -27,20 +27,20 @@
       <input type="hidden" name="invoice_id" value="<?= (int)$invoice['id'] ?>">
       <input type="hidden" name="source" value="show">
       <?php if (($invoice['payment_status'] ?? 'unpaid') === 'paid'): ?>
-        <button type="submit" name="action" value="mark_unpaid">Atcelt apmaksu</button>
+        <button class="btn btn-warning" type="submit" name="action" value="mark_unpaid">Atcelt apmaksu</button>
       <?php else: ?>
-        <button type="submit" name="action" value="mark_paid">Atzīmēt kā apmaksātu</button>
+        <button class="btn btn-success" type="submit" name="action" value="mark_paid">Atzīmēt kā apmaksātu</button>
       <?php endif; ?>
     </form>
 
-    <p><a href="<?= url('/invoice-pdf?id=' . (int)$invoice['id']) ?>">Lejupielādēt PDF</a></p>
+    <p><a class="btn btn-secondary" href="<?= url('/invoice-pdf?id=' . (int)$invoice['id']) ?>">Lejupielādēt PDF</a></p>
 
     <form
       method="post"
       action="<?= url('/invoice-delete') ?>"
       onsubmit="return confirm('Vai tiešām dzēst šo rēķinu? Ja rēķins jau nosūtīts klientam vai izmantots grāmatvedībā, dzēšana nav ieteicama.');">
       <input type="hidden" name="invoice_id" value="<?= (int)$invoice['id'] ?>">
-      <button type="submit">Dzēst rēķinu</button>
+      <button class="btn btn-danger" type="submit">Dzēst rēķinu</button>
     </form>
   </div>
 

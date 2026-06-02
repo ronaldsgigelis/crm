@@ -32,7 +32,7 @@
         <p><strong>Kopējā darbu summa:</strong> <?= number_format($totalAmount, 2, '.', '') ?></p>
 
         <p style="margin-top:12px;">
-            <a href="<?= url('/clients') ?>">← Atpakaļ uz klientiem</a>
+            <a class="btn btn-secondary" href="<?= url('/clients') ?>">← Atpakaļ uz klientiem</a>
         </p>
     </div>
 
@@ -42,40 +42,42 @@
         <?php if (!$jobs): ?>
             <p class="muted">Šim klientam vēl nav neviena darba.</p>
         <?php else: ?>
-            <table>
+            <div class="table-wrap">
+            <table class="table">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th class="td-num">ID</th>
                         <th>Virsraksts</th>
-                        <th>Statuss</th>
-                        <th>Cena</th>
-                        <th>Plānots</th>
+                        <th class="td-nowrap">Statuss</th>
+                        <th class="td-num">Cena</th>
+                        <th class="td-nowrap">Plānots</th>
                         <th>Meistars</th>
-                        <th>Atvērt</th>
+                        <th class="td-nowrap">Atvērt</th>
                     </tr>
                 </thead>
                 <tbody>
 
                     <?php foreach ($jobs as $j): ?>
                         <tr>
-                            <td><?= (int)$j['id'] ?></td>
+                            <td class="td-num"><?= (int)$j['id'] ?></td>
                             <td><?= h($j['title']) ?></td>
 
                             <!-- Statusu rādam latviski ar helperi -->
-                            <td><?= h(job_status_label($j['status'])) ?></td>
+                            <td class="td-nowrap"><?= h(job_status_label($j['status'])) ?></td>
 
-                            <td><?= h($j['price'] ?? '') ?></td>
-                            <td><?= h($j['scheduled_at'] ?? '') ?></td>
+                            <td class="td-num"><?= h($j['price'] ?? '') ?></td>
+                            <td class="td-nowrap"><?= h($j['scheduled_at'] ?? '') ?></td>
                             <td><?= h($j['master_name'] ?? '') ?></td>
 
-                            <td>
-                                <a href="<?= url('/job?id=' . (int)$j['id']) ?>">Darba kartīte</a>
+                            <td class="td-nowrap">
+                                <a class="btn btn-secondary btn-small" href="<?= url('/job?id=' . (int)$j['id']) ?>">Darba kartīte</a>
                             </td>
                         </tr>
                     <?php endforeach; ?>
 
                 </tbody>
             </table>
+            </div>
         <?php endif; ?>
     </div>
 

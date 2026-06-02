@@ -17,86 +17,35 @@
   <!-- Lapas virsraksts (droši ar h()) -->
   <title><?= h($title) ?></title>
 
-  <!-- Vienkāršs iekšējais CSS (demo projektam) -->
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 24px;
-    }
-
-    nav a {
-      margin-right: 12px;
-    }
-
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin-top: 12px;
-    }
-
-    th,
-    td {
-      border: 1px solid #ddd;
-      padding: 8px;
-    }
-
-    th {
-      background: #f4f4f4;
-      text-align: left;
-    }
-
-    .card {
-      border: 1px solid #ddd;
-      padding: 12px;
-      border-radius: 8px;
-      margin-top: 12px;
-    }
-
-    .row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    input,
-    select,
-    textarea {
-      width: 100%;
-      padding: 8px;
-    }
-
-    button {
-      padding: 8px 12px;
-      cursor: pointer;
-    }
-
-    .muted {
-      color: #666;
-    }
-
-    .error {
-      color: #b00020;
-    }
-  </style>
+  <!-- Globālais CRM interfeisa CSS -->
+  <link rel="stylesheet" href="<?= url('/assets/app.css') ?>">
 </head>
 
 <body>
-  <!-- Galvenā navigācija -->
-  <nav>
-    <a href="<?= url('/') ?>">Sākums</a>
-    <a href="<?= url('/clients') ?>">Klienti</a>
-    <a href="<?= url('/jobs') ?>">Darbi</a>
-    <a href="<?= url('/masters') ?>">Meistari</a>
-    <a href="<?= url('/invoices') ?>">Rēķini</a>
-    <a href="<?= url('/invoice-settings') ?>">Rēķinu iestatījumi</a>
-    <a href="<?= url('/manual-invoice') ?>">Rēķinu ģenerators</a>
-  </nav>
+  <div class="app-shell">
+    <!-- Galvenā navigācija -->
+    <nav class="top-nav" aria-label="Galvenā navigācija">
+      <a class="nav-link <?= path() === '/' ? 'nav-link-active' : '' ?>" href="<?= url('/') ?>">Sākums</a>
+      <a class="nav-link <?= path() === '/clients' ? 'nav-link-active' : '' ?>" href="<?= url('/clients') ?>">Klienti</a>
+      <a class="nav-link <?= path() === '/jobs' ? 'nav-link-active' : '' ?>" href="<?= url('/jobs') ?>">Darbi</a>
+      <a class="nav-link <?= path() === '/masters' ? 'nav-link-active' : '' ?>" href="<?= url('/masters') ?>">Meistari</a>
+      <a class="nav-link <?= path() === '/invoices' ? 'nav-link-active' : '' ?>" href="<?= url('/invoices') ?>">Rēķini</a>
+      <a class="nav-link <?= path() === '/invoice-settings' ? 'nav-link-active' : '' ?>" href="<?= url('/invoice-settings') ?>">Rēķinu iestatījumi</a>
+      <a class="nav-link <?= path() === '/manual-invoice' ? 'nav-link-active' : '' ?>" href="<?= url('/manual-invoice') ?>">Rēķinu ģenerators</a>
+    </nav>
 
-  <!-- Lapas virsraksts -->
-  <h1><?= h($title) ?></h1>
+    <main class="page">
+      <header class="page-header">
+        <!-- Lapas virsraksts -->
+        <h1><?= h($title) ?></h1>
+      </header>
 
-  <!-- Dinamiskais saturs no konkrētā view -->
-  <?= $content ?>
+      <div class="content-stack">
+        <!-- Dinamiskais saturs no konkrētā view -->
+        <?= $content ?>
+      </div>
+    </main>
+  </div>
 
 </body>
 

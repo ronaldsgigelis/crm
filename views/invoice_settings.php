@@ -95,7 +95,7 @@
     </form>
 
     <p>
-      <a href="<?= url('/invoice-settings') ?>">Jauns profils</a>
+      <a class="btn btn-secondary" href="<?= url('/invoice-settings') ?>">Jauns profils</a>
     </p>
   </div>
 </div>
@@ -104,14 +104,15 @@
   <h2>Saglabātie profili</h2>
   <p class="muted">Kopā: <?= count($profiles) ?></p>
 
-  <table>
+  <div class="table-wrap">
+  <table class="table">
     <thead>
       <tr>
         <th>Profila nosaukums</th>
         <th>Pārdevējs</th>
-        <th>Reģ. Nr.</th>
-        <th>Noklusētais</th>
-        <th>Darbības</th>
+        <th class="td-nowrap">Reģ. Nr.</th>
+        <th class="td-nowrap">Noklusētais</th>
+        <th class="td-nowrap">Darbības</th>
       </tr>
     </thead>
     <tbody>
@@ -119,21 +120,24 @@
         <tr class="<?= (int)($profile['id'] ?? 0) === (int)$p['id'] ? 'selected-row' : '' ?>">
           <td><?= h($p['profile_name']) ?></td>
           <td><?= h($p['seller_name']) ?></td>
-          <td><?= h($p['seller_registration_no']) ?></td>
-          <td><?= (int)$p['is_default'] === 1 ? 'Jā' : '' ?></td>
-          <td>
-            <a href="<?= url('/invoice-settings?id=' . (int)$p['id']) ?>">Labot</a>
-            <?php if ((int)$p['is_default'] !== 1): ?>
-              <form method="post" action="<?= url('/invoice-settings/default') ?>" style="display:inline;">
-                <input type="hidden" name="id" value="<?= (int)$p['id'] ?>">
-                <button type="submit">Iestatīt kā noklusēto</button>
-              </form>
-            <?php endif; ?>
+          <td class="td-nowrap"><?= h($p['seller_registration_no']) ?></td>
+          <td class="td-nowrap"><?= (int)$p['is_default'] === 1 ? 'Jā' : '' ?></td>
+          <td class="td-nowrap">
+            <div class="table-actions">
+              <a class="btn btn-secondary btn-small" href="<?= url('/invoice-settings?id=' . (int)$p['id']) ?>">Labot</a>
+              <?php if ((int)$p['is_default'] !== 1): ?>
+                <form method="post" action="<?= url('/invoice-settings/default') ?>" style="display:inline;">
+                  <input type="hidden" name="id" value="<?= (int)$p['id'] ?>">
+                  <button class="btn btn-secondary btn-small" type="submit">Iestatīt kā noklusēto</button>
+                </form>
+              <?php endif; ?>
+            </div>
           </td>
         </tr>
       <?php endforeach; ?>
     </tbody>
   </table>
+  </div>
 </div>
 
 <div class="card">
@@ -276,9 +280,9 @@
     </div>
 
     <div class="profile-actions">
-      <button type="submit">Saglabāt profilu</button>
+      <button class="btn btn-primary" type="submit">Saglabāt profilu</button>
       <?php if (!empty($profile['id'])): ?>
-        <a href="<?= url('/invoice-settings') ?>" style="margin-left:8px;">Jauns profils</a>
+        <a class="btn btn-secondary" href="<?= url('/invoice-settings') ?>" style="margin-left:8px;">Jauns profils</a>
       <?php endif; ?>
     </div>
   </form>
