@@ -23,7 +23,10 @@ function jobs_fetch_all(
   // Pamata vaicājums: jobs + clients + masters + job rēķins
   $sql = "
     SELECT j.*, c.name AS client_name, m.name AS master_name,
-           i.id AS invoice_id, i.invoice_number AS invoice_number
+           i.id AS invoice_id, i.invoice_number AS invoice_number,
+           i.due_date AS invoice_due_date,
+           i.payment_status AS invoice_payment_status,
+           i.paid_at AS invoice_paid_at
     FROM jobs j
     JOIN clients c ON c.id = j.client_id
     LEFT JOIN masters m ON m.id = j.master_id
