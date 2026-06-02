@@ -32,6 +32,8 @@
               <a href="<?= url('/job?id=' . (int)$invoice['job_id']) ?>">
                 #<?= (int)$invoice['job_id'] ?> <?= h($invoice['job_title'] ?? '') ?>
               </a>
+            <?php else: ?>
+              Manuāls rēķins
             <?php endif; ?>
           </td>
           <td><?= number_format((float)$invoice['total'], 2, '.', '') ?> <?= h($invoice['currency']) ?></td>
