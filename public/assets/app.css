@@ -1,0 +1,384 @@
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-2: #f4f4f4;
+  --text: #111827;
+  --muted: #666666;
+  --border: #dddddd;
+  --accent: #f0b90b;
+  --accent-hover: #d9a500;
+  --danger: #b00020;
+  --success: #16803c;
+  --warning: #b7791f;
+  --info: #2563eb;
+  --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --radius: 8px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+}
+
+body.theme-dark {
+  --bg: #0b0e11;
+  --surface: #181a20;
+  --surface-2: #1e2329;
+  --text: #eaecef;
+  --muted: #9aa4b2;
+  --border: #2b3139;
+  --accent: #f0b90b;
+  --accent-hover: #f8d33a;
+  --danger: #f6465d;
+  --success: #2ebd85;
+  --warning: #f0b90b;
+  --info: #3b82f6;
+  --shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Arial, sans-serif;
+  margin: 0;
+}
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+}
+
+nav a {
+  margin-right: 12px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 2rem;
+  line-height: 1.2;
+}
+
+.app-shell {
+  width: min(100% - 48px, 1360px);
+  margin: 0 auto;
+  padding: var(--space-6) 0;
+}
+
+.top-nav {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: var(--space-2);
+}
+
+.top-nav .nav-link {
+  margin-right: 0;
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  border-radius: calc(var(--radius) - 2px);
+  color: var(--muted);
+  padding: var(--space-2) var(--space-3);
+  text-decoration: none;
+}
+
+.nav-link:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.nav-link-active {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 50%, transparent);
+}
+
+.page {
+  margin-top: var(--space-6);
+}
+
+.page-header {
+  margin-bottom: var(--space-4);
+}
+
+.content-stack {
+  display: block;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 12px;
+}
+
+th,
+td {
+  border: 1px solid var(--border);
+  padding: 8px;
+}
+
+th {
+  background: var(--surface-2);
+  text-align: left;
+}
+
+input,
+select,
+textarea {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  color: var(--text);
+  box-sizing: border-box;
+  width: 100%;
+  padding: 8px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+  outline: none;
+}
+
+label {
+  display: block;
+  margin-bottom: var(--space-1);
+  font-weight: 700;
+}
+
+button {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 12px;
+  border-radius: var(--radius);
+  margin-top: 12px;
+}
+
+.row,
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  padding: 8px 12px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn-primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #111827;
+}
+
+.btn-primary:hover {
+  border-color: var(--accent-hover);
+  background: var(--accent-hover);
+}
+
+.btn-secondary {
+  background: var(--surface-2);
+}
+
+.btn-danger {
+  border-color: var(--danger);
+  background: var(--danger);
+  color: #ffffff;
+}
+
+.btn-success {
+  border-color: var(--success);
+  background: var(--success);
+  color: #ffffff;
+}
+
+.btn-warning {
+  border-color: var(--warning);
+  background: var(--warning);
+  color: #111827;
+}
+
+.btn-small {
+  padding: 4px 8px;
+  font-size: 0.875rem;
+}
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-top: 12px;
+}
+
+.table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 0;
+  background: var(--surface);
+  font-size: 0.95rem;
+}
+
+.table th,
+.table td {
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  padding: 10px 12px;
+  vertical-align: top;
+}
+
+.table th {
+  background: var(--surface-2);
+  color: var(--text);
+  font-weight: 700;
+}
+
+.table tbody tr:hover {
+  background: color-mix(in srgb, var(--surface-2) 55%, transparent);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.table-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.td-num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.td-nowrap {
+  white-space: nowrap;
+}
+
+.form {
+  display: block;
+}
+
+.form-grid {
+  align-items: start;
+}
+
+.form-section {
+  margin-top: var(--space-4);
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  margin-top: 10px;
+}
+
+.field {
+  margin-bottom: var(--space-3);
+}
+
+.help-text {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-top: var(--space-1);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.error {
+  color: var(--danger);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 2px 8px;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.badge-neutral {
+  border-color: var(--border);
+  background: var(--surface-2);
+  color: var(--muted);
+}
+
+.badge-success {
+  border-color: var(--success);
+  background: color-mix(in srgb, var(--success) 12%, transparent);
+  color: var(--success);
+}
+
+.badge-warning {
+  border-color: var(--warning);
+  background: color-mix(in srgb, var(--warning) 14%, transparent);
+  color: var(--warning);
+}
+
+.badge-danger {
+  border-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  color: var(--danger);
+}
+
+.badge-info {
+  border-color: var(--info);
+  background: color-mix(in srgb, var(--info) 12%, transparent);
+  color: var(--info);
+}
+
+@media (max-width: 800px) {
+  .app-shell {
+    width: min(100% - 32px, 1360px);
+    padding: var(--space-4) 0;
+  }
+
+  .page {
+    margin-top: var(--space-4);
+  }
+
+  h1 {
+    font-size: 1.6rem;
+  }
+
+  nav a {
+    margin-right: 0;
+  }
+
+  .row,
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}

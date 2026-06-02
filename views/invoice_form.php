@@ -11,7 +11,7 @@
 
   <?php if (!$profiles): ?>
     <p class="error">Vispirms izveido rēķina sūtītāja profilu.</p>
-    <p><a href="<?= url('/invoice-settings') ?>">Atvērt rēķinu iestatījumus</a></p>
+    <p><a class="btn btn-secondary" href="<?= url('/invoice-settings') ?>">Atvērt rēķinu iestatījumus</a></p>
   <?php else: ?>
     <p class="muted">Darbs #<?= (int)$job['id'] ?>: <?= h($job['title']) ?></p>
 
@@ -121,8 +121,8 @@
       <textarea name="notes" rows="3"><?= h($form['notes'] ?? '') ?></textarea>
 
       <div style="margin-top:10px;">
-        <button type="submit">Saglabāt rēķinu</button>
-        <a href="<?= url('/job?id=' . (int)$job['id']) ?>" style="margin-left:8px;">Atpakaļ uz darbu</a>
+        <button class="btn btn-primary" type="submit">Saglabāt rēķinu</button>
+        <a class="btn btn-secondary" href="<?= url('/job?id=' . (int)$job['id']) ?>" style="margin-left:8px;">Atpakaļ uz darbu</a>
       </div>
     </form>
   <?php endif; ?>

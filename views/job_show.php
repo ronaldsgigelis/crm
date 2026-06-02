@@ -32,12 +32,12 @@
     <?php if (!empty($invoice)): ?>
       <p>
         <strong>Rēķins jau izveidots:</strong> <?= h($invoice['invoice_number']) ?>
-        <a href="<?= url('/invoice?id=' . (int)$invoice['id']) ?>" style="margin-left:8px;">Skatīt rēķinu</a>
-        <a href="<?= url('/invoice-pdf?id=' . (int)$invoice['id']) ?>" style="margin-left:8px;">Lejupielādēt PDF</a>
+        <a class="btn btn-secondary btn-small" href="<?= url('/invoice?id=' . (int)$invoice['id']) ?>" style="margin-left:8px;">Skatīt rēķinu</a>
+        <a class="btn btn-secondary btn-small" href="<?= url('/invoice-pdf?id=' . (int)$invoice['id']) ?>" style="margin-left:8px;">Lejupielādēt PDF</a>
       </p>
     <?php else: ?>
       <p>
-        <a href="<?= url('/invoice-create?job_id=' . (int)$job['id']) ?>">Ģenerēt rēķinu</a>
+        <a class="btn btn-primary" href="<?= url('/invoice-create?job_id=' . (int)$job['id']) ?>">Ģenerēt rēķinu</a>
       </p>
     <?php endif; ?>
 
@@ -45,10 +45,11 @@
 
     <h3>Rediģēt darbu</h3>
 
-    <form method="post" action="<?= url('/job-update') ?>">
+    <form class="form" method="post" action="<?= url('/job-update') ?>">
       <input type="hidden" name="id" value="<?= (int)$job['id'] ?>">
 
-      <label>Virsraksts*</label>
+      <div class="field">
+        <label>Virsraksts*</label>
       <input
         name="title"
         required
@@ -56,13 +57,19 @@
         value="<?= h($job['title'] ?? '') ?>"
         placeholder="Piemēram, klavieru skaņošana">
 
-      <label>Apraksts</label>
+      </div>
+
+      <div class="field">
+        <label>Apraksts</label>
       <textarea
         name="description"
         rows="4"
         placeholder="Papildu informācija par darbu"><?= h($job['description'] ?? '') ?></textarea>
 
-      <label>Statuss</label>
+      </div>
+
+      <div class="field">
+        <label>Statuss</label>
       <select name="status">
         <?php foreach (['new', 'in_progress', 'done', 'canceled'] as $s): ?>
           <option value="<?= h($s) ?>" <?= ($job['status'] ?? '') === $s ? 'selected' : '' ?>>
@@ -71,7 +78,10 @@
         <?php endforeach; ?>
       </select>
 
-      <label>Cena</label>
+      </div>
+
+      <div class="field">
+        <label>Cena</label>
       <input
         name="price"
         type="number"
@@ -79,12 +89,18 @@
         min="0"
         value="<?= h(($job['price'] !== null && $job['price'] !== '') ? (string)$job['price'] : '') ?>"
         placeholder="0.00">
+      </div>
+
+      <div class="field">
 
       <label>Plānotais darba datums un laiks</label>
       <input
         name="scheduled_at"
         type="datetime-local"
         value="<?= !empty($job['scheduled_at']) ? h(date('Y-m-d\TH:i', strtotime($job['scheduled_at']))) : '' ?>">
+      </div>
+
+      <div class="field">
 
       <label>Meistars</label>
       <select name="master_id">
@@ -99,8 +115,10 @@
         <?php endforeach; ?>
       </select>
 
-      <div style="margin-top:10px;">
-        <button type="submit">Saglabāt izmaiņas</button>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit">Saglabāt izmaiņas</button>
       </div>
     </form>
 
@@ -108,9 +126,10 @@
 
     <h3>Mainīt tikai statusu</h3>
 
-    <form method="post" action="<?= url('/job') ?>">
+    <form class="form form-section" method="post" action="<?= url('/job') ?>">
       <input type="hidden" name="id" value="<?= (int)$job['id'] ?>">
 
+      <div class="field">
       <select name="status">
         <?php foreach (['new', 'in_progress', 'done', 'canceled'] as $s): ?>
           <option value="<?= h($s) ?>" <?= ($job['status'] ?? '') === $s ? 'selected' : '' ?>>
@@ -118,8 +137,11 @@
           </option>
         <?php endforeach; ?>
       </select>
+      </div>
 
-      <button type="submit">Saglabāt statusu</button>
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit">Saglabāt statusu</button>
+      </div>
     </form>
 
   </div>

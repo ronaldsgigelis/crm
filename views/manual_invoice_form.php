@@ -10,7 +10,7 @@
 <?php /** @var string|null $error */ ?>
 
 <div class="card">
-  <p><a href="<?= url('/invoices') ?>">Atpakaļ uz rēķiniem</a></p>
+  <p><a class="btn btn-secondary" href="<?= url('/invoices') ?>">Atpakaļ uz rēķiniem</a></p>
 
   <?php if ($error): ?>
     <p class="error"><?= h($error) ?></p>
@@ -18,7 +18,7 @@
 
   <?php if (!$profiles): ?>
     <p class="error">Vispirms izveido rēķina sūtītāja profilu.</p>
-    <p><a href="<?= url('/invoice-settings') ?>">Atvērt rēķinu iestatījumus</a></p>
+    <p><a class="btn btn-secondary" href="<?= url('/invoice-settings') ?>">Atvērt rēķinu iestatījumus</a></p>
   <?php else: ?>
     <?php if (!empty($templateSaved)): ?>
       <p class="muted">Sagatave saglabāta.</p>
@@ -165,9 +165,9 @@
       <input name="template_name" maxlength="160" value="<?= h($form['template_name'] ?? '') ?>" placeholder="Piemēram, Rēķins RTU">
 
       <div style="margin-top:10px;">
-        <button type="submit" name="action" value="preview_invoice">Priekšskatīt rēķinu</button>
-        <button type="submit" name="action" value="save_template">Saglabāt sagatavi</button>
-        <button type="submit" name="action" value="generate_invoice">Ģenerēt rēķinu</button>
+        <button class="btn btn-secondary" type="submit" name="action" value="preview_invoice">Priekšskatīt rēķinu</button>
+        <button class="btn btn-primary" type="submit" name="action" value="save_template">Saglabāt sagatavi</button>
+        <button class="btn btn-primary" type="submit" name="action" value="generate_invoice">Ģenerēt rēķinu</button>
       </div>
     </form>
   <?php endif; ?>
@@ -180,14 +180,15 @@
   <?php if (!$templates): ?>
     <p class="muted">Sagatavju nav.</p>
   <?php else: ?>
-    <table>
+    <div class="table-wrap">
+    <table class="table">
       <thead>
         <tr>
           <th>Nosaukums</th>
           <th>Maksātājs</th>
           <th>Pakalpojums</th>
-          <th>Summa</th>
-          <th>Darbības</th>
+          <th class="td-num">Summa</th>
+          <th class="td-nowrap">Darbības</th>
         </tr>
       </thead>
       <tbody>
@@ -196,11 +197,12 @@
             <td><?= h($template['template_name']) ?></td>
             <td><?= h($template['payer_name'] ?? '') ?></td>
             <td><?= h($template['service_description'] ?? '') ?></td>
-            <td><?= number_format((float)$template['quantity'] * (float)$template['unit_price'], 2, '.', '') ?> <?= h($template['currency'] ?? 'EUR') ?></td>
-            <td><a href="<?= url('/manual-invoice?template_id=' . (int)$template['id']) ?>">Atvērt</a></td>
+            <td class="td-num"><?= number_format((float)$template['quantity'] * (float)$template['unit_price'], 2, '.', '') ?> <?= h($template['currency'] ?? 'EUR') ?></td>
+            <td class="td-nowrap"><a class="btn btn-secondary btn-small" href="<?= url('/manual-invoice?template_id=' . (int)$template['id']) ?>">Atvērt</a></td>
           </tr>
         <?php endforeach; ?>
       </tbody>
     </table>
+    </div>
   <?php endif; ?>
 </div>

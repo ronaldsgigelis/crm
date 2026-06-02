@@ -16,33 +16,39 @@
     <?php endif; ?>
 
     <!-- POST forma uz /clients -->
-    <form method="post" action="<?= url('/clients') ?>">
-      <label>Vārds*</label>
-      <input
-        name="name"
-        required
-        maxlength="120"
-        placeholder="Piemēram, Jānis Bērziņš">
+    <form class="form" method="post" action="<?= url('/clients') ?>">
+      <div class="field">
+        <label>Vārds*</label>
+        <input
+          name="name"
+          required
+          maxlength="120"
+          placeholder="Piemēram, Jānis Bērziņš">
+      </div>
 
-      <label>Tālrunis</label>
-      <input
-        name="phone"
-        type="tel"
-        autocomplete="tel"
-        inputmode="tel"
-        maxlength="40"
-        placeholder="+371 20000000">
+      <div class="field">
+        <label>Tālrunis</label>
+        <input
+          name="phone"
+          type="tel"
+          autocomplete="tel"
+          inputmode="tel"
+          maxlength="40"
+          placeholder="+371 20000000">
+      </div>
 
-      <label>E-pasts</label>
-      <input
-        name="email"
-        type="email"
-        autocomplete="email"
-        maxlength="120"
-        placeholder="jusu@epasts.com">
+      <div class="field">
+        <label>E-pasts</label>
+        <input
+          name="email"
+          type="email"
+          autocomplete="email"
+          maxlength="120"
+          placeholder="jusu@epasts.com">
+      </div>
 
-      <div style="margin-top:10px;">
-        <button type="submit">Saglabāt</button>
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit">Saglabāt</button>
       </div>
     </form>
   </div>
@@ -54,15 +60,16 @@
     <!-- Klientu skaits -->
     <p class="muted">Kopā: <?= count($clients) ?></p>
 
-    <table>
+    <div class="table-wrap">
+    <table class="table">
       <thead>
         <tr>
-          <th>ID</th>
+          <th class="td-num">ID</th>
           <th>Vārds</th>
           <th>Tālrunis</th>
           <th>E-pasts</th>
-          <th>Izveidots</th>
-          <th>Atvērt</th>
+          <th class="td-nowrap">Izveidots</th>
+          <th class="td-nowrap">Atvērt</th>
         </tr>
       </thead>
       <tbody>
@@ -71,23 +78,24 @@
         <?php foreach ($clients as $c): ?>
           <tr>
             <!-- ID kā integer -->
-            <td><?= (int)$c['id'] ?></td>
+            <td class="td-num"><?= (int)$c['id'] ?></td>
 
             <!-- Droša izvade ar h() -->
             <td><?= h($c['name']) ?></td>
             <td><?= h($c['phone'] ?? '') ?></td>
             <td><?= h($c['email'] ?? '') ?></td>
-            <td><?= h($c['created_at']) ?></td>
+            <td class="td-nowrap"><?= h($c['created_at']) ?></td>
 
             <!-- Saite uz klienta kartīti -->
-            <td>
-              <a href="<?= url('/client?id=' . (int)$c['id']) ?>">Klienta kartīte</a>
+            <td class="td-nowrap">
+              <a class="btn btn-secondary btn-small" href="<?= url('/client?id=' . (int)$c['id']) ?>">Klienta kartīte</a>
             </td>
           </tr>
         <?php endforeach; ?>
 
       </tbody>
     </table>
+    </div>
   </div>
 
 </div>
