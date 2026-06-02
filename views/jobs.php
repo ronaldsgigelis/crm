@@ -160,6 +160,7 @@
           <th>Statuss</th>
           <th>Cena</th>
           <th>Meistars</th>
+          <th>Rēķins</th>
           <th>Atvērt</th>
         </tr>
       </thead>
@@ -177,6 +178,20 @@
 
             <!-- Meistars var būt tukšs -->
             <td><?= h($j['master_name'] ?? '') ?></td>
+
+            <td>
+              <?php if (!empty($j['invoice_id'])): ?>
+                <div>Ir rēķins</div>
+                <?php if (!empty($j['invoice_number'])): ?>
+                  <div><?= h($j['invoice_number']) ?></div>
+                <?php endif; ?>
+                <a href="<?= url('/invoice?id=' . (int)$j['invoice_id']) ?>">Skatīt</a>
+                <a href="<?= url('/invoice-pdf?id=' . (int)$j['invoice_id']) ?>">PDF</a>
+              <?php else: ?>
+                <div>Nav rēķina</div>
+                <a href="<?= url('/invoice-create?job_id=' . (int)$j['id']) ?>">Sagatavot rēķinu</a>
+              <?php endif; ?>
+            </td>
 
             <!-- Saite uz darba kartīti -->
             <td>
