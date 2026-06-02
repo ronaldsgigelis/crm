@@ -21,8 +21,10 @@
   ][$jobStatus] ?? 'badge-neutral badge-status-new';
   ?>
 
-  <div class="card">
-    <h2>#<?= (int)$job['id'] ?> - <?= h($job['title']) ?></h2>
+  <div class="card section">
+    <div class="section-header">
+      <h2 class="section-title">#<?= (int)$job['id'] ?> - <?= h($job['title']) ?></h2>
+    </div>
 
     <?php if ($error): ?>
       <p class="error"><?= h($error) ?></p>
@@ -39,20 +41,20 @@
     </p>
 
     <?php if (!empty($invoice)): ?>
-      <p>
+      <p class="section-actions">
         <strong>Rēķins jau izveidots:</strong> <?= h($invoice['invoice_number']) ?>
         <a class="btn btn-secondary btn-small" href="<?= url('/invoice?id=' . (int)$invoice['id']) ?>" style="margin-left:8px;">Skatīt rēķinu</a>
         <a class="btn btn-secondary btn-small" href="<?= url('/invoice-pdf?id=' . (int)$invoice['id']) ?>" style="margin-left:8px;">Lejupielādēt PDF</a>
       </p>
     <?php else: ?>
-      <p>
+      <p class="section-actions">
         <a class="btn btn-primary" href="<?= url('/invoice-create?job_id=' . (int)$job['id']) ?>">Ģenerēt rēķinu</a>
       </p>
     <?php endif; ?>
 
     <hr>
 
-    <h3>Rediģēt darbu</h3>
+    <h3 class="section-title">Rediģēt darbu</h3>
 
     <form class="form" method="post" action="<?= url('/job-update') ?>">
       <input type="hidden" name="id" value="<?= (int)$job['id'] ?>">
@@ -133,7 +135,7 @@
 
     <hr>
 
-    <h3>Mainīt tikai statusu</h3>
+    <h3 class="section-title">Mainīt tikai statusu</h3>
 
     <form class="form form-section" method="post" action="<?= url('/job') ?>">
       <input type="hidden" name="id" value="<?= (int)$job['id'] ?>">

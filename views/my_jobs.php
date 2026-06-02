@@ -3,8 +3,10 @@
 /** @var array $master */ ?>
 <?php /** @var array $jobs */ ?>
 
-<div class="card">
-    <h2><?= h($master['name']) ?> - mani darbi</h2>
+<div class="card section">
+    <div class="section-header">
+        <h2 class="section-title"><?= h($master['name']) ?> - mani darbi</h2>
+    </div>
     <p class="muted">Kopā: <?= count($jobs) ?></p>
 
     <div class="table-wrap">

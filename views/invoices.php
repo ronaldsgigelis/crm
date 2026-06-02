@@ -4,42 +4,57 @@
 <?php /** @var string $paymentFilter */ ?>
 <?php /** @var bool $deleted */ ?>
 
-<div class="card">
+<div class="card section">
   <?php if (!empty($deleted)): ?>
     <p class="muted">Rēķins dzēsts.</p>
   <?php endif; ?>
 
-  <p>
+  <p class="filter-bar">
     <strong>Tips:</strong>
-    <a class="btn btn-secondary btn-small" href="<?= url('/invoices?type=all&payment=' . ($paymentFilter ?? 'all')) ?>"><?= ($typeFilter ?? 'all') === 'all' ? '<strong>Visi</strong>' : 'Visi' ?></a>
-    <span style="margin-left:8px;">
-      <a class="btn btn-secondary btn-small" href="<?= url('/invoices?type=crm&payment=' . ($paymentFilter ?? 'all')) ?>"><?= ($typeFilter ?? 'all') === 'crm' ? '<strong>CRM rēķini</strong>' : 'CRM rēķini' ?></a>
+    <a class="btn btn-secondary btn-small filter-link <?= ($typeFilter ?? 'all') === 'all' ? 'filter-link-active' : '' ?>" href="<?= url('/invoices?type=all&payment=' . ($paymentFilter ?? 'all')) ?>"><?= ($typeFilter ?? 'all') === 'all' ? '<strong>Visi</strong>' : 'Visi' ?></a>
+    <span class="filter-group">
+      <a class="btn btn-secondary btn-small filter-link <?= ($typeFilter ?? 'all') === 'crm' ? 'filter-link-active' : '' ?>" href="<?= url('/invoices?type=crm&payment=' . ($paymentFilter ?? 'all')) ?>"><?= ($typeFilter ?? 'all') === 'crm' ? '<strong>CRM rēķini</strong>' : 'CRM rēķini' ?></a>
     </span>
-    <span style="margin-left:8px;">
-      <a class="btn btn-secondary btn-small" href="<?= url('/invoices?type=manual&payment=' . ($paymentFilter ?? 'all')) ?>"><?= ($typeFilter ?? 'all') === 'manual' ? '<strong>Manuālie rēķini</strong>' : 'Manuālie rēķini' ?></a>
+    <span class="filter-group">
+      <a class="btn btn-secondary btn-small filter-link <?= ($typeFilter ?? 'all') === 'manual' ? 'filter-link-active' : '' ?>" href="<?= url('/invoices?type=manual&payment=' . ($paymentFilter ?? 'all')) ?>"><?= ($typeFilter ?? 'all') === 'manual' ? '<strong>Manuālie rēķini</strong>' : 'Manuālie rēķini' ?></a>
     </span>
   </p>
 
-  <p>
+  <p class="filter-bar">
     <strong>Apmaksa:</strong>
-    <a class="btn btn-secondary btn-small" href="<?= url('/invoices?type=' . ($typeFilter ?? 'all') . '&payment=all') ?>"><?= ($paymentFilter ?? 'all') === 'all' ? '<strong>Visi</strong>' : 'Visi' ?></a>
-    <span style="margin-left:8px;">
-      <a class="btn btn-secondary btn-small" href="<?= url('/invoices?type=' . ($typeFilter ?? 'all') . '&payment=paid') ?>"><?= ($paymentFilter ?? 'all') === 'paid' ? '<strong>Apmaksātie</strong>' : 'Apmaksātie' ?></a>
+    <a class="btn btn-secondary btn-small filter-link <?= ($paymentFilter ?? 'all') === 'all' ? 'filter-link-active' : '' ?>" href="<?= url('/invoices?type=' . ($typeFilter ?? 'all') . '&payment=all') ?>"><?= ($paymentFilter ?? 'all') === 'all' ? '<strong>Visi</strong>' : 'Visi' ?></a>
+    <span class="filter-group">
+      <a class="btn btn-secondary btn-small filter-link <?= ($paymentFilter ?? 'all') === 'paid' ? 'filter-link-active' : '' ?>" href="<?= url('/invoices?type=' . ($typeFilter ?? 'all') . '&payment=paid') ?>"><?= ($paymentFilter ?? 'all') === 'paid' ? '<strong>Apmaksātie</strong>' : 'Apmaksātie' ?></a>
     </span>
-    <span style="margin-left:8px;">
-      <a class="btn btn-secondary btn-small" href="<?= url('/invoices?type=' . ($typeFilter ?? 'all') . '&payment=unpaid') ?>"><?= ($paymentFilter ?? 'all') === 'unpaid' ? '<strong>Neapmaksātie</strong>' : 'Neapmaksātie' ?></a>
+    <span class="filter-group">
+      <a class="btn btn-secondary btn-small filter-link <?= ($paymentFilter ?? 'all') === 'unpaid' ? 'filter-link-active' : '' ?>" href="<?= url('/invoices?type=' . ($typeFilter ?? 'all') . '&payment=unpaid') ?>"><?= ($paymentFilter ?? 'all') === 'unpaid' ? '<strong>Neapmaksātie</strong>' : 'Neapmaksātie' ?></a>
     </span>
-    <span style="margin-left:8px;">
-      <a class="btn btn-secondary btn-small" href="<?= url('/invoices?type=' . ($typeFilter ?? 'all') . '&payment=overdue') ?>"><?= ($paymentFilter ?? 'all') === 'overdue' ? '<strong>Kavētie</strong>' : 'Kavētie' ?></a>
+    <span class="filter-group">
+      <a class="btn btn-secondary btn-small filter-link <?= ($paymentFilter ?? 'all') === 'overdue' ? 'filter-link-active' : '' ?>" href="<?= url('/invoices?type=' . ($typeFilter ?? 'all') . '&payment=overdue') ?>"><?= ($paymentFilter ?? 'all') === 'overdue' ? '<strong>Kavētie</strong>' : 'Kavētie' ?></a>
     </span>
   </p>
 
-  <div>
-    <p><strong>Rēķinu skaits:</strong> <?= (int)($summary['invoice_count'] ?? count($invoices)) ?></p>
-    <p><strong>Kopā:</strong> <?= number_format((float)($summary['total_amount'] ?? 0), 2, '.', '') ?> EUR</p>
-    <p><strong>Apmaksāts:</strong> <?= number_format((float)($summary['paid_amount'] ?? 0), 2, '.', '') ?> EUR</p>
-    <p><strong>Nav apmaksāts:</strong> <?= number_format((float)($summary['unpaid_amount'] ?? 0), 2, '.', '') ?> EUR</p>
-    <p><strong>Kavēts:</strong> <?= number_format((float)($summary['overdue_amount'] ?? 0), 2, '.', '') ?> EUR</p>
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="summary-card-label">Rēķinu skaits</div>
+      <div class="summary-card-value"><?= (int)($summary['invoice_count'] ?? count($invoices)) ?></div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card-label">Kopā</div>
+      <div class="summary-card-value"><?= number_format((float)($summary['total_amount'] ?? 0), 2, '.', '') ?> EUR</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card-label">Apmaksāts</div>
+      <div class="summary-card-value"><?= number_format((float)($summary['paid_amount'] ?? 0), 2, '.', '') ?> EUR</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card-label">Nav apmaksāts</div>
+      <div class="summary-card-value"><?= number_format((float)($summary['unpaid_amount'] ?? 0), 2, '.', '') ?> EUR</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card-label">Kavēts</div>
+      <div class="summary-card-value"><?= number_format((float)($summary['overdue_amount'] ?? 0), 2, '.', '') ?> EUR</div>
+    </div>
   </div>
 
   <div class="table-wrap">

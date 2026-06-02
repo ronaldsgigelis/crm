@@ -9,15 +9,17 @@
 
 <?php if (!$client): ?>
     <!-- Ja klients nav atrasts -->
-    <div class="card">
+    <div class="card section">
         <p class="error">Klients nav atrasts.</p>
     </div>
 
 <?php else: ?>
 
-    <div class="card">
+    <div class="card section">
         <!-- Klienta pamatinformācija -->
-        <h2>Klienta kartīte - <?= h($client['name']) ?></h2>
+        <div class="section-header">
+            <h2 class="section-title">Klienta kartīte - <?= h($client['name']) ?></h2>
+        </div>
 
         <p><strong>ID:</strong> <?= (int)$client['id'] ?></p>
         <p><strong>Vārds:</strong> <?= h($client['name']) ?></p>
@@ -31,13 +33,15 @@
         <p><strong>Darbu skaits:</strong> <?= (int)$jobsCount ?></p>
         <p><strong>Kopējā darbu summa:</strong> <?= number_format($totalAmount, 2, '.', '') ?></p>
 
-        <p style="margin-top:12px;">
+        <p class="section-actions" style="margin-top:12px;">
             <a class="btn btn-secondary" href="<?= url('/clients') ?>">← Atpakaļ uz klientiem</a>
         </p>
     </div>
 
-    <div class="card">
-        <h2>Klienta darbu vēsture</h2>
+    <div class="card section">
+        <div class="section-header">
+            <h2 class="section-title">Klienta darbu vēsture</h2>
+        </div>
 
         <?php if (!$jobs): ?>
             <p class="muted">Šim klientam vēl nav neviena darba.</p>

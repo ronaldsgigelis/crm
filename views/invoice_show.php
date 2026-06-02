@@ -19,15 +19,17 @@
     ]);
   ?>
 
-  <div class="card">
-    <h1>Rēķins</h1>
+  <div class="card section">
+    <div class="section-header">
+      <h1 class="section-title">Rēķins</h1>
+    </div>
 
     <?php if (!empty($error)): ?>
       <p class="error"><?= h($error) ?></p>
     <?php endif; ?>
 
     <?php if (!empty($invoice['job_id'])): ?>
-      <p><a class="btn btn-secondary" href="<?= url('/job?id=' . (int)$invoice['job_id']) ?>">Atvērt saistīto darbu</a></p>
+      <p class="section-actions"><a class="btn btn-secondary" href="<?= url('/job?id=' . (int)$invoice['job_id']) ?>">Atvērt saistīto darbu</a></p>
     <?php endif; ?>
 
     <p><strong>Apmaksa:</strong> <span class="badge <?= h($invoicePaymentBadgeClass) ?>"><?= h($invoicePaymentLabel) ?></span></p>
@@ -41,7 +43,7 @@
       <?php endif; ?>
     </form>
 
-    <p><a class="btn btn-secondary" href="<?= url('/invoice-pdf?id=' . (int)$invoice['id']) ?>">Lejupielādēt PDF</a></p>
+    <p class="section-actions"><a class="btn btn-secondary" href="<?= url('/invoice-pdf?id=' . (int)$invoice['id']) ?>">Lejupielādēt PDF</a></p>
 
     <form
       method="post"
@@ -52,8 +54,8 @@
     </form>
   </div>
 
-  <div class="card">
-    <div style="background:#fff; max-width:800px; min-height:1000px; margin:0 auto; padding:32px; border:1px solid #ddd;">
+  <div class="card section invoice-preview-wrap">
+    <div class="invoice-preview-page">
       <?= $invoiceHtml ?>
     </div>
   </div>

@@ -7,8 +7,10 @@
 <div class="row">
 
   <!-- Klienta pievienošanas forma -->
-  <div class="card">
-    <h2>Pievienot klientu</h2>
+  <div class="card section">
+    <div class="section-header">
+      <h2 class="section-title">Pievienot klientu</h2>
+    </div>
 
     <!-- Kļūdas ziņa (ja validācija neizgāja) -->
     <?php if ($error): ?>
@@ -54,8 +56,10 @@
   </div>
 
   <!-- Klientu saraksts -->
-  <div class="card">
-    <h2>Klientu saraksts</h2>
+  <div class="card section">
+    <div class="section-header">
+      <h2 class="section-title">Klientu saraksts</h2>
+    </div>
 
     <!-- Klientu skaits -->
     <p class="muted">Kopā: <?= count($clients) ?></p>

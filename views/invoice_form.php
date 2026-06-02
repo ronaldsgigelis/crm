@@ -4,38 +4,40 @@
 <?php /** @var array $form */ ?>
 <?php /** @var string|null $error */ ?>
 
-<div class="card">
+<div class="card section">
   <?php if ($error): ?>
     <p class="error"><?= h($error) ?></p>
   <?php endif; ?>
 
   <?php if (!$profiles): ?>
     <p class="error">Vispirms izveido rēķina sūtītāja profilu.</p>
-    <p><a class="btn btn-secondary" href="<?= url('/invoice-settings') ?>">Atvērt rēķinu iestatījumus</a></p>
+    <p class="section-actions"><a class="btn btn-secondary" href="<?= url('/invoice-settings') ?>">Atvērt rēķinu iestatījumus</a></p>
   <?php else: ?>
     <p class="muted">Darbs #<?= (int)$job['id'] ?>: <?= h($job['title']) ?></p>
 
-    <form method="post" action="<?= url('/invoice-create') ?>">
+    <form class="form" method="post" action="<?= url('/invoice-create') ?>">
       <input type="hidden" name="job_id" value="<?= (int)$form['job_id'] ?>">
 
       <input type="hidden" name="invoice_profile_id" value="<?= (int)($form['invoice_profile_id'] ?? 0) ?>">
 
-      <p>
+      <p class="form-section">
         <strong>Rēķina sūtītājs:</strong>
         <?= h(($selectedProfile['profile_name'] ?? '') . ' - ' . ($selectedProfile['seller_name'] ?? '')) ?>
       </p>
 
-      <label>Rēķina numurs</label>
-      <input
-        name="invoice_number"
-        required
-        maxlength="30"
-        placeholder="<?= ($selectedProfile && ($selectedProfile['numbering_type'] ?? '') === 'manual') ? 'Ievadi rēķina numuru' : '' ?>"
-        value="<?= h($form['invoice_number'] ?? '') ?>">
+      <div class="field">
+        <label>Rēķina numurs</label>
+        <input
+          name="invoice_number"
+          required
+          maxlength="30"
+          placeholder="<?= ($selectedProfile && ($selectedProfile['numbering_type'] ?? '') === 'manual') ? 'Ievadi rēķina numuru' : '' ?>"
+          value="<?= h($form['invoice_number'] ?? '') ?>">
+      </div>
 
-      <h2>Maksātājs</h2>
-      <div class="row">
-        <div>
+      <h2 class="section-title">Maksātājs</h2>
+      <div class="form-grid form-section">
+        <div class="form-section">
           <label>Tips</label>
           <select name="payer_type">
             <?php foreach ([
@@ -60,7 +62,7 @@
           <input name="payer_vat_no" maxlength="80" value="<?= h($form['payer_vat_no'] ?? '') ?>">
         </div>
 
-        <div>
+        <div class="form-section">
           <label>Adrese</label>
           <textarea name="payer_address" rows="3"><?= h($form['payer_address'] ?? '') ?></textarea>
 
@@ -72,24 +74,24 @@
         </div>
       </div>
 
-      <h2>Pakalpojuma saņēmējs</h2>
-      <div class="row">
-        <div>
+      <h2 class="section-title">Pakalpojuma saņēmējs</h2>
+      <div class="form-grid form-section">
+        <div class="form-section">
           <label>Nosaukums / vārds</label>
           <input name="service_receiver_name" maxlength="160" value="<?= h($form['service_receiver_name'] ?? '') ?>">
 
           <label>Adrese</label>
           <textarea name="service_receiver_address" rows="3"><?= h($form['service_receiver_address'] ?? '') ?></textarea>
         </div>
-        <div>
+        <div class="form-section">
           <label>Piezīmes</label>
           <textarea name="service_receiver_notes" rows="5"><?= h($form['service_receiver_notes'] ?? '') ?></textarea>
         </div>
       </div>
 
-      <h2>Rēķins</h2>
-      <div class="row">
-        <div>
+      <h2 class="section-title">Rēķins</h2>
+      <div class="form-grid form-section">
+        <div class="form-section">
           <label>Rēķina datums*</label>
           <input name="invoice_date" type="date" required value="<?= h($form['invoice_date'] ?? '') ?>">
 
@@ -99,7 +101,7 @@
           <label>Pakalpojuma apraksts*</label>
           <textarea name="service_description" required rows="4"><?= h($form['service_description'] ?? '') ?></textarea>
         </div>
-        <div>
+        <div class="form-section">
           <label>Daudzums*</label>
           <input name="quantity" type="number" step="0.01" min="0.01" required value="<?= h((string)($form['quantity'] ?? '1')) ?>">
 
@@ -117,12 +119,14 @@
         </div>
       </div>
 
-      <label>Piezīmes</label>
-      <textarea name="notes" rows="3"><?= h($form['notes'] ?? '') ?></textarea>
+      <div class="field">
+        <label>Piezīmes</label>
+        <textarea name="notes" rows="3"><?= h($form['notes'] ?? '') ?></textarea>
+      </div>
 
-      <div style="margin-top:10px;">
+      <div class="form-actions">
         <button class="btn btn-primary" type="submit">Saglabāt rēķinu</button>
-        <a class="btn btn-secondary" href="<?= url('/job?id=' . (int)$job['id']) ?>" style="margin-left:8px;">Atpakaļ uz darbu</a>
+        <a class="btn btn-secondary" href="<?= url('/job?id=' . (int)$job['id']) ?>">Atpakaļ uz darbu</a>
       </div>
     </form>
   <?php endif; ?>

@@ -3,56 +3,58 @@
 <?php /** @var array $upcomingJobs */ ?>
 <?php /** @var array $recentInvoices */ ?>
 
-<div class="card">
-  <h2>CRM pārskats</h2>
+<div class="card section">
+  <div class="section-header">
+    <h2 class="section-title">CRM pārskats</h2>
+  </div>
 
-  <div class="table-wrap">
-    <table class="table">
-      <tbody>
-        <tr>
-          <th>Kopā klienti</th>
-          <td class="td-num"><?= (int)($summary['clients_count'] ?? 0) ?></td>
-        </tr>
-        <tr>
-          <th>Kopā darbi</th>
-          <td class="td-num"><?= (int)($summary['jobs_count'] ?? 0) ?></td>
-        </tr>
-        <tr>
-          <th>Darbi bez rēķina</th>
-          <td class="td-num"><?= (int)($summary['jobs_without_invoice'] ?? 0) ?></td>
-        </tr>
-        <tr>
-          <th>Neapmaksāti rēķini</th>
-          <td class="td-num"><?= (int)($summary['unpaid_invoices'] ?? 0) ?></td>
-        </tr>
-        <tr>
-          <th>Kavēti rēķini</th>
-          <td class="td-num"><?= (int)($summary['overdue_invoices'] ?? 0) ?></td>
-        </tr>
-        <tr>
-          <th>Izrakstīts šomēnes</th>
-          <td class="td-num"><?= number_format((float)($summary['issued_this_month'] ?? 0), 2, '.', '') ?> EUR</td>
-        </tr>
-        <tr>
-          <th>Apmaksāts šomēnes</th>
-          <td class="td-num"><?= number_format((float)($summary['paid_this_month'] ?? 0), 2, '.', '') ?> EUR</td>
-        </tr>
-      </tbody>
-    </table>
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="summary-card-label">Kopā klienti</div>
+      <div class="summary-card-value"><?= (int)($summary['clients_count'] ?? 0) ?></div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card-label">Kopā darbi</div>
+      <div class="summary-card-value"><?= (int)($summary['jobs_count'] ?? 0) ?></div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card-label">Darbi bez rēķina</div>
+      <div class="summary-card-value"><?= (int)($summary['jobs_without_invoice'] ?? 0) ?></div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card-label">Neapmaksāti rēķini</div>
+      <div class="summary-card-value"><?= (int)($summary['unpaid_invoices'] ?? 0) ?></div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card-label">Kavēti rēķini</div>
+      <div class="summary-card-value"><?= (int)($summary['overdue_invoices'] ?? 0) ?></div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card-label">Izrakstīts šomēnes</div>
+      <div class="summary-card-value"><?= number_format((float)($summary['issued_this_month'] ?? 0), 2, '.', '') ?> EUR</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card-label">Apmaksāts šomēnes</div>
+      <div class="summary-card-value"><?= number_format((float)($summary['paid_this_month'] ?? 0), 2, '.', '') ?> EUR</div>
+    </div>
   </div>
 </div>
 
-<div class="card">
-  <h2>Ātrās saites</h2>
-  <p><a class="btn btn-secondary btn-small" href="<?= url('/jobs?without_invoice=1') ?>">Darbi bez rēķina</a></p>
-  <p><a class="btn btn-secondary btn-small" href="<?= url('/invoices?type=all&payment=unpaid') ?>">Neapmaksāti rēķini</a></p>
-  <p><a class="btn btn-secondary btn-small" href="<?= url('/invoices?type=all&payment=overdue') ?>">Kavēti rēķini</a></p>
-  <p><a class="btn btn-secondary btn-small" href="<?= url('/invoices') ?>">Visi rēķini</a></p>
-  <p><a class="btn btn-secondary btn-small" href="<?= url('/manual-invoice') ?>">Manuāls rēķins</a></p>
+<div class="card section">
+  <div class="section-header">
+    <h2 class="section-title">Ātrās saites</h2>
+  </div>
+  <p class="section-actions"><a class="btn btn-secondary btn-small" href="<?= url('/jobs?without_invoice=1') ?>">Darbi bez rēķina</a></p>
+  <p class="section-actions"><a class="btn btn-secondary btn-small" href="<?= url('/invoices?type=all&payment=unpaid') ?>">Neapmaksāti rēķini</a></p>
+  <p class="section-actions"><a class="btn btn-secondary btn-small" href="<?= url('/invoices?type=all&payment=overdue') ?>">Kavēti rēķini</a></p>
+  <p class="section-actions"><a class="btn btn-secondary btn-small" href="<?= url('/invoices') ?>">Visi rēķini</a></p>
+  <p class="section-actions"><a class="btn btn-secondary btn-small" href="<?= url('/manual-invoice') ?>">Manuāls rēķins</a></p>
 </div>
 
-<div class="card">
-  <h2>Šodienas darbi</h2>
+<div class="card section">
+  <div class="section-header">
+    <h2 class="section-title">Šodienas darbi</h2>
+  </div>
   <?php if (!$todayJobs): ?>
     <p class="muted">Šodien nav ieplānotu darbu.</p>
   <?php else: ?>
@@ -92,8 +94,10 @@
   <?php endif; ?>
 </div>
 
-<div class="card">
-  <h2>Tuvākie darbi</h2>
+<div class="card section">
+  <div class="section-header">
+    <h2 class="section-title">Tuvākie darbi</h2>
+  </div>
   <?php if (!$upcomingJobs): ?>
     <p class="muted">Nav tuvāko ieplānoto darbu.</p>
   <?php else: ?>
@@ -133,8 +137,10 @@
   <?php endif; ?>
 </div>
 
-<div class="card">
-  <h2>Pēdējie rēķini</h2>
+<div class="card section">
+  <div class="section-header">
+    <h2 class="section-title">Pēdējie rēķini</h2>
+  </div>
   <?php if (!$recentInvoices): ?>
     <p class="muted">Rēķinu vēl nav.</p>
   <?php else: ?>

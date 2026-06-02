@@ -16,8 +16,10 @@
 <div class="row">
 
   <!-- Darba pievienošanas forma -->
-  <div class="card">
-    <h2>Pievienot darbu</h2>
+  <div class="card section">
+    <div class="section-header">
+      <h2 class="section-title">Pievienot darbu</h2>
+    </div>
 
     <!-- Kļūdas ziņa -->
     <?php if ($error): ?>
@@ -105,18 +107,20 @@
   </div>
 
   <!-- Darbu saraksts -->
-  <div class="card">
-    <h2>Darbu saraksts</h2>
+  <div class="card section">
+    <div class="section-header">
+      <h2 class="section-title">Darbu saraksts</h2>
+    </div>
 
     <!-- Darbu skaits -->
     <p class="muted">Kopā: <?= count($jobs) ?></p>
 
     <!-- Filtri -->
-    <form class="form form-section" method="get" action="<?= url('/jobs') ?>">
+    <form class="form form-section filter-bar" method="get" action="<?= url('/jobs') ?>">
 
       <!-- Filtrs pēc meistara -->
-      <div class="form-grid">
-        <div class="field">
+      <div class="form-grid filter-group">
+        <div class="field filter-group">
           <label>Meistars:</label>
           <select name="master_id">
             <option value="0">Visi</option>
@@ -131,7 +135,7 @@
         </div>
 
         <!-- Filtrs pēc statusa -->
-        <div class="field">
+        <div class="field filter-group">
           <label>Statuss:</label>
           <select name="status">
             <option value="">Visi</option>
@@ -143,7 +147,7 @@
         </div>
 
         <!-- Filtrs pēc klienta -->
-        <div class="field">
+        <div class="field filter-group">
           <label>Klients:</label>
           <select name="client_id">
             <option value="0">Visi</option>
@@ -159,7 +163,7 @@
       </div>
 
       <!-- Checkbox filtrs: tikai darbi bez piešķirta meistara -->
-      <div class="form-actions">
+      <div class="form-actions filter-group">
         <label style="display:inline-flex; align-items:center; gap:8px; white-space:nowrap;">
           <span>Tikai bez meistara</span>
           <input
@@ -179,7 +183,7 @@
         </label>
 
         <button class="btn btn-secondary btn-small" type="submit">Filtrēt</button>
-        <a class="btn btn-secondary btn-small" href="<?= url('/jobs') ?>">Notīrīt</a>
+        <a class="btn btn-secondary btn-small filter-link" href="<?= url('/jobs') ?>">Notīrīt</a>
       </div>
     </form>
 

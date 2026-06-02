@@ -6,8 +6,10 @@
 
 <div class="row">
 
-    <div class="card">
-        <h2>Pievienot meistaru</h2>
+    <div class="card section">
+        <div class="section-header">
+            <h2 class="section-title">Pievienot meistaru</h2>
+        </div>
 
         <?php if ($error): ?>
             <p class="error"><?= h($error) ?></p>
@@ -54,8 +56,10 @@
         </form>
     </div>
 
-    <div class="card">
-        <h2>Meistari</h2>
+    <div class="card section">
+        <div class="section-header">
+            <h2 class="section-title">Meistari</h2>
+        </div>
         <p class="muted">Kopā: <?= count($masters) ?></p>
 
         <div class="table-wrap">
