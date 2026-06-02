@@ -5,6 +5,7 @@
 <?php /** @var array $form */ ?>
 <?php /** @var string $generatedNumber */ ?>
 <?php /** @var array|null $previewInvoice */ ?>
+<?php /** @var string $previewHtml */ ?>
 <?php /** @var bool $templateSaved */ ?>
 <?php /** @var string|null $error */ ?>
 
@@ -25,6 +26,17 @@
 
     <?php if ($selectedTemplate): ?>
       <p class="muted">Atvērta sagatave: <?= h($selectedTemplate['template_name']) ?></p>
+    <?php endif; ?>
+
+    <?php if (!empty($previewInvoice)): ?>
+      <h2>Rēķina priekšskatījums</h2>
+      <p class="muted">Priekšskatījums nav saglabāts rēķinu vēsturē.</p>
+      <div style="background:#fff; max-width:800px; min-height:1000px; margin:12px auto 18px; padding:32px; border:1px solid #ddd;">
+        <?= invoice_render_document_html($previewInvoice, [
+          'full_document' => false,
+          'logo_src' => invoice_public_logo_url($previewInvoice['seller_logo_path'] ?? null),
+        ]) ?>
+      </div>
     <?php endif; ?>
 
     <form method="post" action="<?= url('/manual-invoice') ?>">
@@ -160,94 +172,6 @@
     </form>
   <?php endif; ?>
 </div>
-
-<?php if (!empty($previewInvoice)): ?>
-  <div class="card">
-    <h2>Rēķina priekšskatījums</h2>
-
-    <div class="row">
-      <div>
-        <?php if (!empty($previewInvoice['seller_logo_path'])): ?>
-          <img src="<?= h(invoice_public_logo_url($previewInvoice['seller_logo_path'])) ?>" alt="Logo" style="max-width:160px;max-height:90px;">
-        <?php endif; ?>
-
-        <h3>Pārdevējs</h3>
-        <p><strong>Nosaukums:</strong> <?= h($previewInvoice['seller_name']) ?></p>
-        <p><strong>Reģ. Nr.:</strong> <?= h($previewInvoice['seller_registration_no']) ?></p>
-        <?php if (!empty($previewInvoice['seller_vat_no'])): ?>
-          <p><strong>PVN Nr.:</strong> <?= h($previewInvoice['seller_vat_no']) ?></p>
-        <?php endif; ?>
-        <p><strong>Juridiskā adrese:</strong><br><?= nl2br(h($previewInvoice['seller_address'])) ?></p>
-        <?php if (!empty($previewInvoice['seller_email'])): ?><p><strong>E-pasts:</strong> <?= h($previewInvoice['seller_email']) ?></p><?php endif; ?>
-        <?php if (!empty($previewInvoice['seller_phone'])): ?><p><strong>Telefons:</strong> <?= h($previewInvoice['seller_phone']) ?></p><?php endif; ?>
-        <?php if (!empty($previewInvoice['seller_bank_name'])): ?><p><strong>Banka:</strong> <?= h($previewInvoice['seller_bank_name']) ?></p><?php endif; ?>
-        <?php if (!empty($previewInvoice['seller_iban'])): ?><p><strong>IBAN:</strong> <?= h($previewInvoice['seller_iban']) ?></p><?php endif; ?>
-        <?php if (!empty($previewInvoice['seller_swift'])): ?><p><strong>SWIFT/BIC:</strong> <?= h($previewInvoice['seller_swift']) ?></p><?php endif; ?>
-      </div>
-
-      <div>
-        <h3>Rēķins <?= h($previewInvoice['invoice_number']) ?></h3>
-        <p><strong>Datums:</strong> <?= h($previewInvoice['invoice_date']) ?></p>
-        <p><strong>Apmaksas termiņš:</strong> <?= h($previewInvoice['due_date'] ?? '') ?></p>
-        <p class="muted">Priekšskatījums nav saglabāts rēķinu vēsturē.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h3>Maksātājs</h3>
-    <p><strong>Tips:</strong> <?= h(invoice_payer_type_label($previewInvoice['payer_type'])) ?></p>
-    <p><strong>Nosaukums / vārds:</strong> <?= h($previewInvoice['payer_name']) ?></p>
-    <?php if (!empty($previewInvoice['payer_registration_no'])): ?><p><strong>Reģ. Nr.:</strong> <?= h($previewInvoice['payer_registration_no']) ?></p><?php endif; ?>
-    <?php if (!empty($previewInvoice['payer_vat_no'])): ?><p><strong>PVN Nr.:</strong> <?= h($previewInvoice['payer_vat_no']) ?></p><?php endif; ?>
-    <?php if (!empty($previewInvoice['payer_address'])): ?><p><strong>Adrese:</strong><br><?= nl2br(h($previewInvoice['payer_address'])) ?></p><?php endif; ?>
-    <?php if (!empty($previewInvoice['payer_email'])): ?><p><strong>E-pasts:</strong> <?= h($previewInvoice['payer_email']) ?></p><?php endif; ?>
-    <?php if (!empty($previewInvoice['payer_phone'])): ?><p><strong>Telefons:</strong> <?= h($previewInvoice['payer_phone']) ?></p><?php endif; ?>
-  </div>
-
-  <?php if (!empty($previewInvoice['service_receiver_name']) || !empty($previewInvoice['service_receiver_address']) || !empty($previewInvoice['service_receiver_notes'])): ?>
-    <div class="card">
-      <h3>Pakalpojuma saņēmējs</h3>
-      <?php if (!empty($previewInvoice['service_receiver_name'])): ?><p><strong>Nosaukums / vārds:</strong> <?= h($previewInvoice['service_receiver_name']) ?></p><?php endif; ?>
-      <?php if (!empty($previewInvoice['service_receiver_address'])): ?><p><strong>Adrese:</strong><br><?= nl2br(h($previewInvoice['service_receiver_address'])) ?></p><?php endif; ?>
-      <?php if (!empty($previewInvoice['service_receiver_notes'])): ?><p><strong>Piezīmes:</strong><br><?= nl2br(h($previewInvoice['service_receiver_notes'])) ?></p><?php endif; ?>
-    </div>
-  <?php endif; ?>
-
-  <div class="card">
-    <table>
-      <thead>
-        <tr>
-          <th>Pakalpojums</th>
-          <th>Daudzums</th>
-          <th>Mērv.</th>
-          <th>Cena</th>
-          <th>PVN %</th>
-          <th>Kopā</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><?= nl2br(h($previewInvoice['service_description'])) ?></td>
-          <td><?= h((string)$previewInvoice['quantity']) ?></td>
-          <td><?= h($previewInvoice['unit']) ?></td>
-          <td><?= number_format((float)$previewInvoice['unit_price'], 2, '.', '') ?></td>
-          <td><?= number_format((float)$previewInvoice['vat_rate'], 2, '.', '') ?></td>
-          <td><?= number_format((float)$previewInvoice['subtotal'], 2, '.', '') ?> <?= h($previewInvoice['currency']) ?></td>
-        </tr>
-      </tbody>
-    </table>
-
-    <p><strong>Summa bez PVN:</strong> <?= number_format((float)$previewInvoice['subtotal'], 2, '.', '') ?> <?= h($previewInvoice['currency']) ?></p>
-    <p><strong>PVN:</strong> <?= number_format((float)$previewInvoice['vat_amount'], 2, '.', '') ?> <?= h($previewInvoice['currency']) ?></p>
-    <p><strong>Apmaksai:</strong> <?= number_format((float)$previewInvoice['total'], 2, '.', '') ?> <?= h($previewInvoice['currency']) ?></p>
-
-    <?php if (!empty($previewInvoice['notes'])): ?>
-      <h3>Piezīmes</h3>
-      <p><?= nl2br(h($previewInvoice['notes'])) ?></p>
-    <?php endif; ?>
-  </div>
-<?php endif; ?>
 
 <div class="card">
   <h2>Saglabātās sagataves</h2>

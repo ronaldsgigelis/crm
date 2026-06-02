@@ -786,6 +786,15 @@ function manual_invoice_form(?string $error = null, ?array $form = null, ?array 
     $generatedNumber = invoice_generate_next_number($selectedProfile, $form['invoice_date']);
   }
 
+  $previewHtml = '';
+  if ($previewInvoice) {
+    $previewHtml = invoice_render_document_html($previewInvoice, [
+      'full_document' => false,
+      'logo_src' => invoice_public_logo_url($previewInvoice['seller_logo_path'] ?? null),
+      'preview_notice' => true,
+    ]);
+  }
+
   render('manual_invoice_form.php', [
     'profiles' => $profiles,
     'templates' => $templates,
@@ -794,6 +803,7 @@ function manual_invoice_form(?string $error = null, ?array $form = null, ?array 
     'form' => $form,
     'generatedNumber' => $generatedNumber,
     'previewInvoice' => $previewInvoice,
+    'previewHtml' => $previewHtml,
     'templateSaved' => (int)($_GET['template_saved'] ?? 0) === 1,
     'error' => $error,
   ], 'Manuāls rēķins');
@@ -1391,47 +1401,32 @@ function invoice_pdf_logo_src(?string $path): string
   return 'data:' . $info['mime'] . ';base64,' . base64_encode($data);
 }
 
-function invoice_pdf(): void
+function invoice_render_document_html(array $invoice, array $options = []): string
 {
-  $invoice = invoice_fetch((int)($_GET['id'] ?? 0));
-  if (!$invoice) {
-    http_response_code(404);
-    echo '404 Not Found';
-    return;
-  }
+  $fullDocument = (bool)($options['full_document'] ?? true);
+  $logoSrc = (string)($options['logo_src'] ?? '');
+  $previewNotice = (bool)($options['preview_notice'] ?? false);
 
-  $autoload = __DIR__ . '/../../vendor/autoload.php';
-  if (!is_file($autoload)) {
-    render('invoice_show.php', [
-      'invoice' => $invoice,
-      'error' => 'PDF ģenerēšanai nav instalēta Dompdf bibliotēka. Palaid composer install projekta saknē.',
-    ], 'Rēķins');
-    return;
-  }
+  $style = <<<HTML
+  <style>
+    .invoice-document { font-family: "DejaVu Sans", Arial, sans-serif; font-size: 12px; color: #222; background: #fff; }
+    .invoice-document h1 { font-size: 22px; margin: 0 0 12px; }
+    .invoice-document h2 { font-size: 14px; margin: 18px 0 6px; }
+    .invoice-document table { border-collapse: collapse; width: 100%; margin-top: 12px; }
+    .invoice-document th,
+    .invoice-document td { border: 1px solid #ccc; padding: 6px; text-align: left; vertical-align: top; }
+    .invoice-document th { background: #f2f2f2; }
+    .invoice-document .top { width: 100%; margin-bottom: 18px; }
+    .invoice-document .top td { border: 0; padding: 0; }
+    .invoice-document .right { text-align: right; }
+    .invoice-document .logo { max-width: 150px; max-height: 90px; }
+    .invoice-document .preview-note { margin-top: 8px; color: #666; }
+  </style>
+HTML;
 
-  require_once $autoload;
-
-  $logoSrc = invoice_pdf_logo_src($invoice['seller_logo_path'] ?? null);
   ob_start();
   ?>
-  <!doctype html>
-  <html lang="lv">
-  <head>
-    <meta charset="utf-8">
-    <style>
-      body { font-family: "DejaVu Sans", sans-serif; font-size: 12px; color: #222; }
-      h1 { font-size: 22px; margin: 0 0 12px; }
-      h2 { font-size: 14px; margin: 18px 0 6px; }
-      table { border-collapse: collapse; width: 100%; margin-top: 12px; }
-      th, td { border: 1px solid #ccc; padding: 6px; text-align: left; vertical-align: top; }
-      th { background: #f2f2f2; }
-      .top { width: 100%; margin-bottom: 18px; }
-      .top td { border: 0; padding: 0; }
-      .right { text-align: right; }
-      .logo { max-width: 150px; max-height: 90px; }
-    </style>
-  </head>
-  <body>
+  <div class="invoice-document">
     <table class="top">
       <tr>
         <td>
@@ -1443,6 +1438,9 @@ function invoice_pdf(): void
           <h1>Rēķins <?= h($invoice['invoice_number']) ?></h1>
           <div>Datums: <?= h($invoice['invoice_date']) ?></div>
           <div>Apmaksas termiņš: <?= h($invoice['due_date'] ?? '') ?></div>
+          <?php if ($previewNotice): ?>
+            <div class="preview-note">Priekšskatījums nav saglabāts rēķinu vēsturē.</div>
+          <?php endif; ?>
         </td>
       </tr>
     </table>
@@ -1505,10 +1503,41 @@ function invoice_pdf(): void
       <h2>Piezīmes</h2>
       <div><?= nl2br(h($invoice['notes'])) ?></div>
     <?php endif; ?>
-  </body>
-  </html>
+  </div>
   <?php
-  $html = ob_get_clean();
+  $body = ob_get_clean();
+
+  if (!$fullDocument) {
+    return $style . $body;
+  }
+
+  return '<!doctype html><html lang="lv"><head><meta charset="utf-8">' . $style . '</head><body>' . $body . '</body></html>';
+}
+
+function invoice_pdf(): void
+{
+  $invoice = invoice_fetch((int)($_GET['id'] ?? 0));
+  if (!$invoice) {
+    http_response_code(404);
+    echo '404 Not Found';
+    return;
+  }
+
+  $autoload = __DIR__ . '/../../vendor/autoload.php';
+  if (!is_file($autoload)) {
+    render('invoice_show.php', [
+      'invoice' => $invoice,
+      'error' => 'PDF ģenerēšanai nav instalēta Dompdf bibliotēka. Palaid composer install projekta saknē.',
+    ], 'Rēķins');
+    return;
+  }
+
+  require_once $autoload;
+
+  $html = invoice_render_document_html($invoice, [
+    'full_document' => true,
+    'logo_src' => invoice_pdf_logo_src($invoice['seller_logo_path'] ?? null),
+  ]);
 
   try {
     $options = new Dompdf\Options();
