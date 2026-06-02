@@ -185,6 +185,14 @@
                 <?php if (!empty($j['invoice_number'])): ?>
                   <div><?= h($j['invoice_number']) ?></div>
                 <?php endif; ?>
+                <div>
+                  Apmaksa:
+                  <?= h(invoice_payment_status_label([
+                    'payment_status' => $j['invoice_payment_status'] ?? 'unpaid',
+                    'paid_at' => $j['invoice_paid_at'] ?? null,
+                    'due_date' => $j['invoice_due_date'] ?? null,
+                  ])) ?>
+                </div>
                 <a href="<?= url('/invoice?id=' . (int)$j['invoice_id']) ?>">Skatīt</a>
                 <a href="<?= url('/invoice-pdf?id=' . (int)$j['invoice_id']) ?>">PDF</a>
               <?php else: ?>
