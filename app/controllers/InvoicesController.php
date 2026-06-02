@@ -481,14 +481,24 @@ function invoice_settings_default_store(): void
   redirect(url('/invoice-settings?saved=1'));
 }
 
-function invoices_fetch_all(string $type = 'all'): array
+function invoices_fetch_all(string $type = 'all', string $payment = 'all'): array
 {
-  $where = '';
+  $where = [];
   if ($type === 'crm') {
-    $where = 'WHERE i.job_id IS NOT NULL';
+    $where[] = 'i.job_id IS NOT NULL';
   } elseif ($type === 'manual') {
-    $where = 'WHERE i.job_id IS NULL';
+    $where[] = 'i.job_id IS NULL';
   }
+
+  if ($payment === 'paid') {
+    $where[] = "i.payment_status = 'paid'";
+  } elseif ($payment === 'unpaid') {
+    $where[] = "i.payment_status = 'unpaid' AND i.due_date >= CURDATE()";
+  } elseif ($payment === 'overdue') {
+    $where[] = "i.payment_status = 'unpaid' AND i.due_date < CURDATE()";
+  }
+
+  $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
   return db()->query("
     SELECT i.id, i.invoice_number, i.invoice_date, i.due_date, i.payer_name,
@@ -496,7 +506,7 @@ function invoices_fetch_all(string $type = 'all'): array
            j.title AS job_title
     FROM invoices i
     LEFT JOIN jobs j ON j.id = i.job_id
-    {$where}
+    {$whereSql}
     ORDER BY i.invoice_date DESC, i.id DESC
   ")->fetchAll();
 }
@@ -508,9 +518,15 @@ function invoices_index(): void
     $type = 'all';
   }
 
+  $payment = trim($_GET['payment'] ?? 'all');
+  if (!in_array($payment, ['all', 'paid', 'unpaid', 'overdue'], true)) {
+    $payment = 'all';
+  }
+
   render('invoices.php', [
-    'invoices' => invoices_fetch_all($type),
+    'invoices' => invoices_fetch_all($type, $payment),
     'typeFilter' => $type,
+    'paymentFilter' => $payment,
     'deleted' => (int)($_GET['deleted'] ?? 0) === 1,
   ], 'Rēķini');
 }
@@ -535,18 +551,22 @@ function invoice_payment_status_update(): void
   $action = trim($_POST['action'] ?? '');
   $source = trim($_POST['source'] ?? 'show');
   $type = trim($_POST['type'] ?? 'all');
-
-  if (!in_array($action, ['mark_paid', 'mark_unpaid'], true)) {
-    redirect(url('/invoices'));
-  }
+  $payment = trim($_POST['payment'] ?? 'all');
 
   if (!in_array($type, ['all', 'crm', 'manual'], true)) {
     $type = 'all';
   }
+  if (!in_array($payment, ['all', 'paid', 'unpaid', 'overdue'], true)) {
+    $payment = 'all';
+  }
+
+  if (!in_array($action, ['mark_paid', 'mark_unpaid'], true)) {
+    redirect(url('/invoices?type=' . $type . '&payment=' . $payment));
+  }
 
   $invoice = invoice_fetch($id);
   if (!$invoice) {
-    redirect(url('/invoices' . ($source === 'list' ? '?type=' . $type : '')));
+    redirect(url('/invoices' . ($source === 'list' ? '?type=' . $type . '&payment=' . $payment : '')));
   }
 
   if ($action === 'mark_paid') {
@@ -565,7 +585,7 @@ function invoice_payment_status_update(): void
   $stmt->execute([':id' => $id]);
 
   if ($source === 'list') {
-    redirect(url('/invoices?type=' . $type));
+    redirect(url('/invoices?type=' . $type . '&payment=' . $payment));
   }
 
   redirect(url('/invoice?id=' . $id));

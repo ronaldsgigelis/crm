@@ -1,5 +1,6 @@
 <?php /** @var array $invoices */ ?>
 <?php /** @var string $typeFilter */ ?>
+<?php /** @var string $paymentFilter */ ?>
 <?php /** @var bool $deleted */ ?>
 
 <div class="card">
@@ -8,12 +9,27 @@
   <?php endif; ?>
 
   <p>
-    <a href="<?= url('/invoices?type=all') ?>"><?= ($typeFilter ?? 'all') === 'all' ? '<strong>Visi</strong>' : 'Visi' ?></a>
+    <strong>Tips:</strong>
+    <a href="<?= url('/invoices?type=all&payment=' . ($paymentFilter ?? 'all')) ?>"><?= ($typeFilter ?? 'all') === 'all' ? '<strong>Visi</strong>' : 'Visi' ?></a>
     <span style="margin-left:8px;">
-      <a href="<?= url('/invoices?type=crm') ?>"><?= ($typeFilter ?? 'all') === 'crm' ? '<strong>CRM rēķini</strong>' : 'CRM rēķini' ?></a>
+      <a href="<?= url('/invoices?type=crm&payment=' . ($paymentFilter ?? 'all')) ?>"><?= ($typeFilter ?? 'all') === 'crm' ? '<strong>CRM rēķini</strong>' : 'CRM rēķini' ?></a>
     </span>
     <span style="margin-left:8px;">
-      <a href="<?= url('/invoices?type=manual') ?>"><?= ($typeFilter ?? 'all') === 'manual' ? '<strong>Manuālie rēķini</strong>' : 'Manuālie rēķini' ?></a>
+      <a href="<?= url('/invoices?type=manual&payment=' . ($paymentFilter ?? 'all')) ?>"><?= ($typeFilter ?? 'all') === 'manual' ? '<strong>Manuālie rēķini</strong>' : 'Manuālie rēķini' ?></a>
+    </span>
+  </p>
+
+  <p>
+    <strong>Apmaksa:</strong>
+    <a href="<?= url('/invoices?type=' . ($typeFilter ?? 'all') . '&payment=all') ?>"><?= ($paymentFilter ?? 'all') === 'all' ? '<strong>Visi</strong>' : 'Visi' ?></a>
+    <span style="margin-left:8px;">
+      <a href="<?= url('/invoices?type=' . ($typeFilter ?? 'all') . '&payment=paid') ?>"><?= ($paymentFilter ?? 'all') === 'paid' ? '<strong>Apmaksātie</strong>' : 'Apmaksātie' ?></a>
+    </span>
+    <span style="margin-left:8px;">
+      <a href="<?= url('/invoices?type=' . ($typeFilter ?? 'all') . '&payment=unpaid') ?>"><?= ($paymentFilter ?? 'all') === 'unpaid' ? '<strong>Neapmaksātie</strong>' : 'Neapmaksātie' ?></a>
+    </span>
+    <span style="margin-left:8px;">
+      <a href="<?= url('/invoices?type=' . ($typeFilter ?? 'all') . '&payment=overdue') ?>"><?= ($paymentFilter ?? 'all') === 'overdue' ? '<strong>Kavētie</strong>' : 'Kavētie' ?></a>
     </span>
   </p>
 
@@ -57,6 +73,7 @@
               <input type="hidden" name="invoice_id" value="<?= (int)$invoice['id'] ?>">
               <input type="hidden" name="source" value="list">
               <input type="hidden" name="type" value="<?= h($typeFilter ?? 'all') ?>">
+              <input type="hidden" name="payment" value="<?= h($paymentFilter ?? 'all') ?>">
               <?php if (($invoice['payment_status'] ?? 'unpaid') === 'paid'): ?>
                 <button type="submit" name="action" value="mark_unpaid">Atcelt apmaksu</button>
               <?php else: ?>
