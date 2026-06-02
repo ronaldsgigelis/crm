@@ -511,6 +511,51 @@ function invoices_fetch_all(string $type = 'all', string $payment = 'all'): arra
   ")->fetchAll();
 }
 
+function invoices_summary(string $type = 'all', string $payment = 'all'): array
+{
+  $typeWhere = [];
+  if ($type === 'crm') {
+    $typeWhere[] = 'job_id IS NOT NULL';
+  } elseif ($type === 'manual') {
+    $typeWhere[] = 'job_id IS NULL';
+  }
+
+  $activeWhere = $typeWhere;
+  if ($payment === 'paid') {
+    $activeWhere[] = "payment_status = 'paid'";
+  } elseif ($payment === 'unpaid') {
+    $activeWhere[] = "payment_status = 'unpaid' AND due_date >= CURDATE()";
+  } elseif ($payment === 'overdue') {
+    $activeWhere[] = "payment_status = 'unpaid' AND due_date < CURDATE()";
+  }
+
+  $activeWhereSql = $activeWhere ? 'WHERE ' . implode(' AND ', $activeWhere) : '';
+  $typeWhereSql = $typeWhere ? 'WHERE ' . implode(' AND ', $typeWhere) : '';
+
+  $active = db()->query("
+    SELECT COUNT(*) AS invoice_count, COALESCE(SUM(total), 0) AS total_amount
+    FROM invoices
+    {$activeWhereSql}
+  ")->fetch();
+
+  $breakdown = db()->query("
+    SELECT
+      COALESCE(SUM(CASE WHEN payment_status = 'paid' THEN total ELSE 0 END), 0) AS paid_amount,
+      COALESCE(SUM(CASE WHEN payment_status = 'unpaid' AND due_date >= CURDATE() THEN total ELSE 0 END), 0) AS unpaid_amount,
+      COALESCE(SUM(CASE WHEN payment_status = 'unpaid' AND due_date < CURDATE() THEN total ELSE 0 END), 0) AS overdue_amount
+    FROM invoices
+    {$typeWhereSql}
+  ")->fetch();
+
+  return [
+    'invoice_count' => (int)($active['invoice_count'] ?? 0),
+    'total_amount' => (float)($active['total_amount'] ?? 0),
+    'paid_amount' => (float)($breakdown['paid_amount'] ?? 0),
+    'unpaid_amount' => (float)($breakdown['unpaid_amount'] ?? 0),
+    'overdue_amount' => (float)($breakdown['overdue_amount'] ?? 0),
+  ];
+}
+
 function invoices_index(): void
 {
   $type = trim($_GET['type'] ?? 'all');
@@ -525,6 +570,7 @@ function invoices_index(): void
 
   render('invoices.php', [
     'invoices' => invoices_fetch_all($type, $payment),
+    'summary' => invoices_summary($type, $payment),
     'typeFilter' => $type,
     'paymentFilter' => $payment,
     'deleted' => (int)($_GET['deleted'] ?? 0) === 1,
