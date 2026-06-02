@@ -13,12 +13,14 @@ require_once __DIR__ . '/../helpers.php';
  * - status           -> konkrēts statuss
  * - client_id        -> konkrēts klients
  * - without_master   -> tikai darbi bez piešķirta meistara
+ * - without_invoice  -> tikai darbi bez rēķina
  */
 function jobs_fetch_all(
   int $masterId = 0,
   string $status = '',
   int $clientId = 0,
-  bool $withoutMaster = false
+  bool $withoutMaster = false,
+  bool $withoutInvoice = false
 ): array {
   // Pamata vaicājums: jobs + clients + masters + job rēķins
   $sql = "
@@ -41,6 +43,13 @@ function jobs_fetch_all(
   // -----------------------------------------
   if ($withoutMaster) {
     $where[] = "j.master_id IS NULL";
+  }
+
+  // -----------------------------------------
+  // Filtrs: tikai bez rēķina
+  // -----------------------------------------
+  if ($withoutInvoice) {
+    $where[] = "i.id IS NULL";
   }
 
   // -----------------------------------------
@@ -111,6 +120,7 @@ function job_fetch_one(int $id): ?array
  * - statuss
  * - klients
  * - tikai bez meistara
+ * - tikai bez rēķina
  */
 function jobs_index(): void
 {
@@ -134,6 +144,7 @@ function jobs_index(): void
   $status = trim($_GET['status'] ?? '');
   $clientId = (int)($_GET['client_id'] ?? 0);
   $withoutMaster = (int)($_GET['without_master'] ?? 0) === 1;
+  $withoutInvoice = (int)($_GET['without_invoice'] ?? 0) === 1;
 
   // -----------------------------------------
   // Whitelist priekš statusa
@@ -159,7 +170,7 @@ function jobs_index(): void
   }
 
   // Darbu saraksts ar filtriem
-  $jobs = jobs_fetch_all($masterId, $status, $clientId, $withoutMaster);
+  $jobs = jobs_fetch_all($masterId, $status, $clientId, $withoutMaster, $withoutInvoice);
 
   // Renderē darbu skatu
   render('jobs.php', [
@@ -170,6 +181,7 @@ function jobs_index(): void
     'statusFilter' => $status,
     'clientId' => $clientId,
     'withoutMaster' => $withoutMaster,
+    'withoutInvoice' => $withoutInvoice,
     'error' => null
   ], 'Darbi');
 }

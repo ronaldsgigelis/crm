@@ -9,6 +9,7 @@
 <?php /** @var string $statusFilter */ ?>
 <?php /** @var int $clientId */ ?>
 <?php /** @var bool $withoutMaster */ ?>
+<?php /** @var bool $withoutInvoice */ ?>
 
 <!-- View: darbu pievienošana + darbu saraksts -->
 
@@ -144,6 +145,15 @@
             name="without_master"
             value="1"
             <?= !empty($withoutMaster) ? 'checked' : '' ?>>
+        </label>
+
+        <label style="display:inline-flex; align-items:center; gap:8px; white-space:nowrap; margin-left:10px;">
+          <span>Bez rēķina</span>
+          <input
+            type="checkbox"
+            name="without_invoice"
+            value="1"
+            <?= !empty($withoutInvoice) ? 'checked' : '' ?>>
         </label>
 
         <button type="submit" style="margin-left:10px;">Filtrēt</button>

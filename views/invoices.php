@@ -1,4 +1,5 @@
 <?php /** @var array $invoices */ ?>
+<?php /** @var array $summary */ ?>
 <?php /** @var string $typeFilter */ ?>
 <?php /** @var string $paymentFilter */ ?>
 <?php /** @var bool $deleted */ ?>
@@ -33,7 +34,13 @@
     </span>
   </p>
 
-  <p class="muted">Kopā: <?= count($invoices) ?></p>
+  <div>
+    <p><strong>Rēķinu skaits:</strong> <?= (int)($summary['invoice_count'] ?? count($invoices)) ?></p>
+    <p><strong>Kopā:</strong> <?= number_format((float)($summary['total_amount'] ?? 0), 2, '.', '') ?> EUR</p>
+    <p><strong>Apmaksāts:</strong> <?= number_format((float)($summary['paid_amount'] ?? 0), 2, '.', '') ?> EUR</p>
+    <p><strong>Nav apmaksāts:</strong> <?= number_format((float)($summary['unpaid_amount'] ?? 0), 2, '.', '') ?> EUR</p>
+    <p><strong>Kavēts:</strong> <?= number_format((float)($summary['overdue_amount'] ?? 0), 2, '.', '') ?> EUR</p>
+  </div>
 
   <table>
     <thead>
