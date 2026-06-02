@@ -17,7 +17,7 @@
 
   .profile-form-grid {
     display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+    grid-template-columns: minmax(0, 2fr) minmax(340px, 1fr);
     gap: 18px;
     align-items: start;
   }
@@ -40,8 +40,21 @@
   }
 
   .profile-options label {
-    display: block;
-    margin: 9px 0;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    column-gap: 12px;
+    margin: 10px 0;
+    max-width: 360px;
+  }
+
+  .profile-options label span {
+    min-width: 0;
+    white-space: normal;
+  }
+
+  .profile-options input[type="checkbox"] {
+    justify-self: end;
   }
 
   .profile-actions {
@@ -152,6 +165,7 @@
         <div class="profile-field">
           <label>PVN numurs</label>
           <input name="seller_vat_no" maxlength="100" value="<?= h($profile['seller_vat_no'] ?? '') ?>">
+          <p class="muted">Aizpildi tikai tad, ja profils ir PVN maksātājs.</p>
         </div>
 
         <div class="profile-field">
@@ -210,14 +224,54 @@
 
       <div class="card profile-options">
         <h2>Rādīšana rēķinā</h2>
-        <label><input type="checkbox" name="show_logo" value="1" <?= !empty($profile['show_logo']) ? 'checked' : '' ?>> Rādīt logo rēķinā</label>
-        <label><input type="checkbox" name="show_seller_vat_no" value="1" <?= !empty($profile['show_seller_vat_no']) ? 'checked' : '' ?>> Rādīt PVN numuru</label>
-        <label><input type="checkbox" name="show_seller_email" value="1" <?= !empty($profile['show_seller_email']) ? 'checked' : '' ?>> Rādīt e-pastu</label>
-        <label><input type="checkbox" name="show_seller_phone" value="1" <?= !empty($profile['show_seller_phone']) ? 'checked' : '' ?>> Rādīt telefonu</label>
-        <label><input type="checkbox" name="show_seller_bank_name" value="1" <?= !empty($profile['show_seller_bank_name']) ? 'checked' : '' ?>> Rādīt banku</label>
-        <label><input type="checkbox" name="show_seller_iban" value="1" <?= !empty($profile['show_seller_iban']) ? 'checked' : '' ?>> Rādīt IBAN</label>
-        <label><input type="checkbox" name="show_seller_swift" value="1" <?= !empty($profile['show_seller_swift']) ? 'checked' : '' ?>> Rādīt SWIFT/BIC</label>
-        <label><input type="checkbox" name="show_invoice_note" value="1" <?= !empty($profile['show_invoice_note']) ? 'checked' : '' ?>> Rādīt rēķina piezīmi</label>
+        <p class="muted">Pamata pārdevēja dati rēķinā tiek rādīti vienmēr: nosaukums, reģistrācijas numurs un juridiskā adrese.</p>
+        <p class="muted">Šeit vari izvēlēties tikai papildu laukus, ko rādīt rēķinā.</p>
+        <label><span>Rādīt logo rēķinā</span><input type="checkbox" name="show_logo" value="1" <?= !empty($profile['show_logo']) ? 'checked' : '' ?>></label>
+        <label><span>Rādīt PVN numuru</span><input type="checkbox" name="show_seller_vat_no" value="1" <?= !empty($profile['show_seller_vat_no']) ? 'checked' : '' ?>></label>
+        <p class="muted">Atzīmē tikai tad, ja profils ir PVN maksātājs.</p>
+        <label><span>Rādīt e-pastu</span><input type="checkbox" name="show_seller_email" value="1" <?= !empty($profile['show_seller_email']) ? 'checked' : '' ?>></label>
+        <label><span>Rādīt telefonu</span><input type="checkbox" name="show_seller_phone" value="1" <?= !empty($profile['show_seller_phone']) ? 'checked' : '' ?>></label>
+        <label><span>Rādīt banku</span><input type="checkbox" name="show_seller_bank_name" value="1" <?= !empty($profile['show_seller_bank_name']) ? 'checked' : '' ?>></label>
+        <label><span>Rādīt IBAN</span><input type="checkbox" name="show_seller_iban" value="1" <?= !empty($profile['show_seller_iban']) ? 'checked' : '' ?>></label>
+        <label><span>Rādīt SWIFT/BIC</span><input type="checkbox" name="show_seller_swift" value="1" <?= !empty($profile['show_seller_swift']) ? 'checked' : '' ?>></label>
+        <label><span>Rādīt rēķina piezīmi</span><input type="checkbox" name="show_invoice_note" value="1" <?= !empty($profile['show_invoice_note']) ? 'checked' : '' ?>></label>
+
+        <hr>
+
+        <h2>Rēķina numura iestatījumi</h2>
+
+        <div class="profile-field">
+          <label>Numerācijas tips</label>
+          <select name="numbering_type">
+            <?php foreach ([
+              'yearly_sequence' => 'Gada secība',
+              'daily_sequence' => 'Datums + dienas secība',
+              'continuous_sequence' => 'Tikai kopējā secība',
+              'manual' => 'Manuāls numurs',
+            ] as $value => $label): ?>
+              <option value="<?= h($value) ?>" <?= ($profile['numbering_type'] ?? 'yearly_sequence') === $value ? 'selected' : '' ?>>
+                <?= h($label) ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+
+        <div class="profile-field">
+          <label>Prefikss</label>
+          <input name="numbering_prefix" maxlength="50" value="<?= h($profile['numbering_prefix'] ?? 'R') ?>">
+        </div>
+
+        <div class="profile-field">
+          <label>Atdalītājs</label>
+          <input name="numbering_separator" maxlength="10" value="<?= h($profile['numbering_separator'] ?? '-') ?>">
+        </div>
+
+        <div class="profile-field">
+          <label>Ciparu skaits secībai</label>
+          <input name="numbering_padding" type="number" min="1" max="10" value="<?= (int)($profile['numbering_padding'] ?? 4) ?>">
+        </div>
+
+        <p class="muted"><strong>Priekšskatījums:</strong> <?= h(invoice_number_preview($profile)) ?></p>
       </div>
     </div>
 
