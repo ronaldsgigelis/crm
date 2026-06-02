@@ -20,12 +20,14 @@ function jobs_fetch_all(
   int $clientId = 0,
   bool $withoutMaster = false
 ): array {
-  // Pamata vaicājums: jobs + clients + masters
+  // Pamata vaicājums: jobs + clients + masters + job rēķins
   $sql = "
-    SELECT j.*, c.name AS client_name, m.name AS master_name
+    SELECT j.*, c.name AS client_name, m.name AS master_name,
+           i.id AS invoice_id, i.invoice_number AS invoice_number
     FROM jobs j
     JOIN clients c ON c.id = j.client_id
     LEFT JOIN masters m ON m.id = j.master_id
+    LEFT JOIN invoices i ON i.job_id = j.id
   ";
 
   $params = [];
