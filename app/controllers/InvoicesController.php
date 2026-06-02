@@ -492,7 +492,8 @@ function invoices_fetch_all(string $type = 'all'): array
 
   return db()->query("
     SELECT i.id, i.invoice_number, i.invoice_date, i.due_date, i.payer_name,
-           i.total, i.currency, i.job_id, j.title AS job_title
+           i.total, i.currency, i.job_id, i.payment_status, i.paid_at,
+           j.title AS job_title
     FROM invoices i
     LEFT JOIN jobs j ON j.id = i.job_id
     {$where}
@@ -512,6 +513,62 @@ function invoices_index(): void
     'typeFilter' => $type,
     'deleted' => (int)($_GET['deleted'] ?? 0) === 1,
   ], 'Rēķini');
+}
+
+function invoice_payment_status_label(array $invoice): string
+{
+  if (($invoice['payment_status'] ?? 'unpaid') === 'paid') {
+    return 'Apmaksāts' . (!empty($invoice['paid_at']) ? ', ' . $invoice['paid_at'] : '');
+  }
+
+  $dueDate = $invoice['due_date'] ?? null;
+  if ($dueDate && $dueDate < date('Y-m-d')) {
+    return 'Kavēts';
+  }
+
+  return 'Nav apmaksāts';
+}
+
+function invoice_payment_status_update(): void
+{
+  $id = (int)($_POST['invoice_id'] ?? 0);
+  $action = trim($_POST['action'] ?? '');
+  $source = trim($_POST['source'] ?? 'show');
+  $type = trim($_POST['type'] ?? 'all');
+
+  if (!in_array($action, ['mark_paid', 'mark_unpaid'], true)) {
+    redirect(url('/invoices'));
+  }
+
+  if (!in_array($type, ['all', 'crm', 'manual'], true)) {
+    $type = 'all';
+  }
+
+  $invoice = invoice_fetch($id);
+  if (!$invoice) {
+    redirect(url('/invoices' . ($source === 'list' ? '?type=' . $type : '')));
+  }
+
+  if ($action === 'mark_paid') {
+    $stmt = db()->prepare("
+      UPDATE invoices
+      SET payment_status = 'paid', paid_at = CURDATE()
+      WHERE id = :id
+    ");
+  } else {
+    $stmt = db()->prepare("
+      UPDATE invoices
+      SET payment_status = 'unpaid', paid_at = NULL
+      WHERE id = :id
+    ");
+  }
+  $stmt->execute([':id' => $id]);
+
+  if ($source === 'list') {
+    redirect(url('/invoices?type=' . $type));
+  }
+
+  redirect(url('/invoice?id=' . $id));
 }
 
 function invoice_fetch_job(int $jobId): ?array

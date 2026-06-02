@@ -29,6 +29,7 @@
         <th>Maksātājs</th>
         <th>Saistītais darbs</th>
         <th>Summa</th>
+        <th>Apmaksa</th>
         <th>Darbības</th>
       </tr>
     </thead>
@@ -50,6 +51,19 @@
             <?php endif; ?>
           </td>
           <td><?= number_format((float)$invoice['total'], 2, '.', '') ?> <?= h($invoice['currency']) ?></td>
+          <td>
+            <div><?= h(invoice_payment_status_label($invoice)) ?></div>
+            <form method="post" action="<?= url('/invoice-payment-status') ?>" style="display:inline;">
+              <input type="hidden" name="invoice_id" value="<?= (int)$invoice['id'] ?>">
+              <input type="hidden" name="source" value="list">
+              <input type="hidden" name="type" value="<?= h($typeFilter ?? 'all') ?>">
+              <?php if (($invoice['payment_status'] ?? 'unpaid') === 'paid'): ?>
+                <button type="submit" name="action" value="mark_unpaid">Atcelt apmaksu</button>
+              <?php else: ?>
+                <button type="submit" name="action" value="mark_paid">Atzīmēt kā apmaksātu</button>
+              <?php endif; ?>
+            </form>
+          </td>
           <td>
             <a href="<?= url('/invoice?id=' . (int)$invoice['id']) ?>">Skatīt</a>
             <a href="<?= url('/invoice-pdf?id=' . (int)$invoice['id']) ?>" style="margin-left:8px;">PDF</a>

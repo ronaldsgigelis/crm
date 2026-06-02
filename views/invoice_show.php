@@ -22,6 +22,17 @@
       <p><a href="<?= url('/job?id=' . (int)$invoice['job_id']) ?>">Atvērt saistīto darbu</a></p>
     <?php endif; ?>
 
+    <p><strong>Apmaksa:</strong> <?= h(invoice_payment_status_label($invoice)) ?></p>
+    <form method="post" action="<?= url('/invoice-payment-status') ?>">
+      <input type="hidden" name="invoice_id" value="<?= (int)$invoice['id'] ?>">
+      <input type="hidden" name="source" value="show">
+      <?php if (($invoice['payment_status'] ?? 'unpaid') === 'paid'): ?>
+        <button type="submit" name="action" value="mark_unpaid">Atcelt apmaksu</button>
+      <?php else: ?>
+        <button type="submit" name="action" value="mark_paid">Atzīmēt kā apmaksātu</button>
+      <?php endif; ?>
+    </form>
+
     <p><a href="<?= url('/invoice-pdf?id=' . (int)$invoice['id']) ?>">Lejupielādēt PDF</a></p>
 
     <form
