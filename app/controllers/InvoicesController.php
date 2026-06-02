@@ -481,21 +481,35 @@ function invoice_settings_default_store(): void
   redirect(url('/invoice-settings?saved=1'));
 }
 
-function invoices_fetch_all(): array
+function invoices_fetch_all(string $type = 'all'): array
 {
+  $where = '';
+  if ($type === 'crm') {
+    $where = 'WHERE i.job_id IS NOT NULL';
+  } elseif ($type === 'manual') {
+    $where = 'WHERE i.job_id IS NULL';
+  }
+
   return db()->query("
     SELECT i.id, i.invoice_number, i.invoice_date, i.due_date, i.payer_name,
            i.total, i.currency, i.job_id, j.title AS job_title
     FROM invoices i
     LEFT JOIN jobs j ON j.id = i.job_id
+    {$where}
     ORDER BY i.invoice_date DESC, i.id DESC
   ")->fetchAll();
 }
 
 function invoices_index(): void
 {
+  $type = trim($_GET['type'] ?? 'all');
+  if (!in_array($type, ['all', 'crm', 'manual'], true)) {
+    $type = 'all';
+  }
+
   render('invoices.php', [
-    'invoices' => invoices_fetch_all(),
+    'invoices' => invoices_fetch_all($type),
+    'typeFilter' => $type,
     'deleted' => (int)($_GET['deleted'] ?? 0) === 1,
   ], 'Rēķini');
 }
