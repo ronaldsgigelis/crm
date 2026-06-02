@@ -5,6 +5,14 @@
   <p class="error">Rēķins nav atrasts.</p>
 <?php else: ?>
   <?php
+    $invoicePaymentLabel = invoice_payment_status_label($invoice);
+    $invoicePaymentBadgeClass = 'badge-warning badge-payment-unpaid';
+    if (strpos($invoicePaymentLabel, 'Apmaksāts') === 0) {
+      $invoicePaymentBadgeClass = 'badge-success badge-payment-paid';
+    } elseif ($invoicePaymentLabel === 'Kavēts') {
+      $invoicePaymentBadgeClass = 'badge-danger badge-payment-overdue';
+    }
+
     $invoiceHtml = invoice_render_document_html($invoice, [
       'full_document' => false,
       'logo_src' => invoice_public_logo_url($invoice['seller_logo_path'] ?? null),
@@ -22,7 +30,7 @@
       <p><a class="btn btn-secondary" href="<?= url('/job?id=' . (int)$invoice['job_id']) ?>">Atvērt saistīto darbu</a></p>
     <?php endif; ?>
 
-    <p><strong>Apmaksa:</strong> <?= h(invoice_payment_status_label($invoice)) ?></p>
+    <p><strong>Apmaksa:</strong> <span class="badge <?= h($invoicePaymentBadgeClass) ?>"><?= h($invoicePaymentLabel) ?></span></p>
     <form method="post" action="<?= url('/invoice-payment-status') ?>">
       <input type="hidden" name="invoice_id" value="<?= (int)$invoice['id'] ?>">
       <input type="hidden" name="source" value="show">

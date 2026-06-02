@@ -21,13 +21,22 @@
         </thead>
         <tbody>
             <?php foreach ($jobs as $j): ?>
+                <?php
+                $jobStatus = $j['status'] ?? '';
+                $jobStatusBadgeClass = [
+                    'new' => 'badge-neutral badge-status-new',
+                    'in_progress' => 'badge-warning badge-status-in-progress',
+                    'done' => 'badge-success badge-status-done',
+                    'canceled' => 'badge-danger badge-status-canceled',
+                ][$jobStatus] ?? 'badge-neutral badge-status-new';
+                ?>
                 <tr>
                     <td class="td-num"><?= (int)$j['id'] ?></td>
                     <td><?= h($j['client_name']) ?></td>
                     <td><?= h($j['title']) ?></td>
 
                     <!-- Statusu lietotājam rādam latviski -->
-                    <td class="td-nowrap"><?= h(job_status_label($j['status'])) ?></td>
+                    <td class="td-nowrap"><span class="badge <?= h($jobStatusBadgeClass) ?>"><?= h(job_status_label($j['status'])) ?></span></td>
 
                     <td class="td-nowrap"><?= h($j['scheduled_at'] ?? '') ?></td>
                     <td class="td-nowrap">

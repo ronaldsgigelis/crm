@@ -359,6 +359,60 @@ button {
   color: var(--info);
 }
 
+.badge-status-new {
+  border-color: var(--border);
+  background: var(--surface-2);
+  color: var(--muted);
+}
+
+.badge-status-in-progress {
+  border-color: var(--warning);
+  background: color-mix(in srgb, var(--warning) 14%, transparent);
+  color: var(--warning);
+}
+
+.badge-status-done {
+  border-color: var(--success);
+  background: color-mix(in srgb, var(--success) 12%, transparent);
+  color: var(--success);
+}
+
+.badge-status-canceled {
+  border-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  color: var(--danger);
+}
+
+.badge-payment-paid {
+  border-color: var(--success);
+  background: color-mix(in srgb, var(--success) 12%, transparent);
+  color: var(--success);
+}
+
+.badge-payment-unpaid {
+  border-color: var(--warning);
+  background: color-mix(in srgb, var(--warning) 14%, transparent);
+  color: var(--warning);
+}
+
+.badge-payment-overdue {
+  border-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  color: var(--danger);
+}
+
+.badge-invoice-manual {
+  border-color: var(--border);
+  background: var(--surface-2);
+  color: var(--muted);
+}
+
+.badge-invoice-crm {
+  border-color: var(--info);
+  background: color-mix(in srgb, var(--info) 12%, transparent);
+  color: var(--info);
+}
+
 @media (max-width: 800px) {
   .app-shell {
     width: min(100% - 32px, 1360px);

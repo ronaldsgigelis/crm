@@ -59,9 +59,18 @@
     </thead>
     <tbody>
       <?php foreach ($invoices as $invoice): ?>
+        <?php
+        $invoicePaymentLabel = invoice_payment_status_label($invoice);
+        $invoicePaymentBadgeClass = 'badge-warning badge-payment-unpaid';
+        if (strpos($invoicePaymentLabel, 'Apmaksāts') === 0) {
+          $invoicePaymentBadgeClass = 'badge-success badge-payment-paid';
+        } elseif ($invoicePaymentLabel === 'Kavēts') {
+          $invoicePaymentBadgeClass = 'badge-danger badge-payment-overdue';
+        }
+        ?>
         <tr>
           <td class="td-nowrap"><?= h($invoice['invoice_number']) ?></td>
-          <td class="td-nowrap"><?= empty($invoice['job_id']) ? 'Manuāls rēķins' : 'CRM rēķins' ?></td>
+          <td class="td-nowrap"><span class="badge <?= empty($invoice['job_id']) ? 'badge-neutral badge-invoice-manual' : 'badge-info badge-invoice-crm' ?>"><?= empty($invoice['job_id']) ? 'Manuāls rēķins' : 'CRM rēķins' ?></span></td>
           <td class="td-nowrap"><?= h($invoice['invoice_date']) ?></td>
           <td class="td-nowrap"><?= h($invoice['due_date'] ?? '') ?></td>
           <td><?= h($invoice['payer_name']) ?></td>
@@ -71,12 +80,12 @@
                 #<?= (int)$invoice['job_id'] ?> <?= h($invoice['job_title'] ?? '') ?>
               </a>
             <?php else: ?>
-              Manuāls rēķins
+              <span class="badge badge-neutral badge-invoice-manual">Manuāls rēķins</span>
             <?php endif; ?>
           </td>
           <td class="td-num"><?= number_format((float)$invoice['total'], 2, '.', '') ?> <?= h($invoice['currency']) ?></td>
           <td class="td-nowrap">
-            <div><?= h(invoice_payment_status_label($invoice)) ?></div>
+            <div><span class="badge <?= h($invoicePaymentBadgeClass) ?>"><?= h($invoicePaymentLabel) ?></span></div>
             <form method="post" action="<?= url('/invoice-payment-status') ?>" style="display:inline;">
               <input type="hidden" name="invoice_id" value="<?= (int)$invoice['id'] ?>">
               <input type="hidden" name="source" value="list">

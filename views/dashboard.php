@@ -69,11 +69,20 @@
       </thead>
       <tbody>
         <?php foreach ($todayJobs as $job): ?>
+          <?php
+          $jobStatus = $job['status'] ?? '';
+          $jobStatusBadgeClass = [
+            'new' => 'badge-neutral badge-status-new',
+            'in_progress' => 'badge-warning badge-status-in-progress',
+            'done' => 'badge-success badge-status-done',
+            'canceled' => 'badge-danger badge-status-canceled',
+          ][$jobStatus] ?? 'badge-neutral badge-status-new';
+          ?>
           <tr>
             <td class="td-nowrap"><?= h($job['scheduled_at'] ?? '') ?></td>
             <td><?= h($job['client_name'] ?? '') ?></td>
             <td><?= h($job['title'] ?? '') ?></td>
-            <td class="td-nowrap"><?= h(dashboard_job_status_label($job['status'] ?? '')) ?></td>
+            <td class="td-nowrap"><span class="badge <?= h($jobStatusBadgeClass) ?>"><?= h(dashboard_job_status_label($job['status'] ?? '')) ?></span></td>
             <td class="td-nowrap"><a class="btn btn-secondary btn-small" href="<?= url('/job?id=' . (int)$job['id']) ?>">Atvērt</a></td>
           </tr>
         <?php endforeach; ?>
@@ -101,11 +110,20 @@
       </thead>
       <tbody>
         <?php foreach ($upcomingJobs as $job): ?>
+          <?php
+          $jobStatus = $job['status'] ?? '';
+          $jobStatusBadgeClass = [
+            'new' => 'badge-neutral badge-status-new',
+            'in_progress' => 'badge-warning badge-status-in-progress',
+            'done' => 'badge-success badge-status-done',
+            'canceled' => 'badge-danger badge-status-canceled',
+          ][$jobStatus] ?? 'badge-neutral badge-status-new';
+          ?>
           <tr>
             <td class="td-nowrap"><?= h($job['scheduled_at'] ?? '') ?></td>
             <td><?= h($job['client_name'] ?? '') ?></td>
             <td><?= h($job['title'] ?? '') ?></td>
-            <td class="td-nowrap"><?= h(dashboard_job_status_label($job['status'] ?? '')) ?></td>
+            <td class="td-nowrap"><span class="badge <?= h($jobStatusBadgeClass) ?>"><?= h(dashboard_job_status_label($job['status'] ?? '')) ?></span></td>
             <td class="td-nowrap"><a class="btn btn-secondary btn-small" href="<?= url('/job?id=' . (int)$job['id']) ?>">Atvērt</a></td>
           </tr>
         <?php endforeach; ?>
@@ -133,11 +151,20 @@
       </thead>
       <tbody>
         <?php foreach ($recentInvoices as $invoice): ?>
+          <?php
+          $invoicePaymentLabel = dashboard_invoice_payment_status_label($invoice);
+          $invoicePaymentBadgeClass = 'badge-warning badge-payment-unpaid';
+          if (strpos($invoicePaymentLabel, 'Apmaksāts') === 0) {
+            $invoicePaymentBadgeClass = 'badge-success badge-payment-paid';
+          } elseif ($invoicePaymentLabel === 'Kavēts') {
+            $invoicePaymentBadgeClass = 'badge-danger badge-payment-overdue';
+          }
+          ?>
           <tr>
             <td class="td-nowrap"><?= h($invoice['invoice_number'] ?? '') ?></td>
             <td><?= h($invoice['payer_name'] ?? '') ?></td>
             <td class="td-num"><?= number_format((float)($invoice['total'] ?? 0), 2, '.', '') ?> <?= h($invoice['currency'] ?? 'EUR') ?></td>
-            <td class="td-nowrap"><?= h(dashboard_invoice_payment_status_label($invoice)) ?></td>
+            <td class="td-nowrap"><span class="badge <?= h($invoicePaymentBadgeClass) ?>"><?= h($invoicePaymentLabel) ?></span></td>
             <td class="td-nowrap"><a class="btn btn-secondary btn-small" href="<?= url('/invoice?id=' . (int)$invoice['id']) ?>">Atvērt</a></td>
           </tr>
         <?php endforeach; ?>

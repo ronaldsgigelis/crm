@@ -11,6 +11,15 @@
   <p class="error">Darbs nav atrasts.</p>
 
 <?php else: ?>
+  <?php
+  $jobStatus = $job['status'] ?? '';
+  $jobStatusBadgeClass = [
+    'new' => 'badge-neutral badge-status-new',
+    'in_progress' => 'badge-warning badge-status-in-progress',
+    'done' => 'badge-success badge-status-done',
+    'canceled' => 'badge-danger badge-status-canceled',
+  ][$jobStatus] ?? 'badge-neutral badge-status-new';
+  ?>
 
   <div class="card">
     <h2>#<?= (int)$job['id'] ?> - <?= h($job['title']) ?></h2>
@@ -20,7 +29,7 @@
     <?php endif; ?>
 
     <p><strong>Klients:</strong> <?= h($job['client_name']) ?></p>
-    <p><strong>Statuss:</strong> <?= h(job_status_label($job['status'])) ?></p>
+    <p><strong>Statuss:</strong> <span class="badge <?= h($jobStatusBadgeClass) ?>"><?= h(job_status_label($job['status'])) ?></span></p>
     <p><strong>Cena:</strong> <?= h((string)($job['price'] ?? '')) ?></p>
     <p><strong>Plānots:</strong> <?= h($job['scheduled_at'] ?? '') ?></p>
     <p><strong>Meistars:</strong> <?= h($job['master_name'] ?? '') ?></p>
