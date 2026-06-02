@@ -89,6 +89,7 @@
     <a href="<?= url('/masters') ?>">Meistari</a>
     <a href="<?= url('/invoices') ?>">Rēķini</a>
     <a href="<?= url('/invoice-settings') ?>">Rēķinu iestatījumi</a>
+    <a href="<?= url('/manual-invoice') ?>">Rēķinu ģenerators</a>
   </nav>
 
   <!-- Lapas virsraksts -->

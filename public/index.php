@@ -102,6 +102,14 @@ if (is_route('GET', '/invoices')) {
   invoices_index();
   exit;
 }
+if (is_route('GET', '/manual-invoice')) {
+  manual_invoice_form();
+  exit;
+}
+if (is_route('POST', '/manual-invoice')) {
+  manual_invoice_store();
+  exit;
+}
 if (is_route('GET', '/invoice-create')) {
   invoice_create_form();
   exit;
