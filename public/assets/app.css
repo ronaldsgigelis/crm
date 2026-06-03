@@ -1064,6 +1064,114 @@ button {
   margin-top: var(--space-1);
 }
 
+.masters-page {
+  align-items: start;
+  grid-template-columns: minmax(260px, 300px) minmax(0, 1fr);
+  gap: var(--space-5);
+}
+
+.masters-page > .card {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.masters-create-panel,
+.masters-panel,
+.my-jobs-panel,
+.my-jobs-hero {
+  width: 100%;
+  min-width: 0;
+}
+
+.masters-create-panel,
+.masters-panel {
+  gap: var(--space-4);
+}
+
+.masters-create-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.masters-count,
+.my-jobs-count {
+  font-variant-numeric: tabular-nums;
+}
+
+.masters-table,
+.my-jobs-table {
+  min-width: 680px;
+}
+
+.masters-table-wrap,
+.my-jobs-table-wrap {
+  width: 100%;
+  max-width: 100%;
+}
+
+.master-name-cell,
+.my-job-title-cell {
+  min-width: 190px;
+}
+
+.master-contact-cell {
+  min-width: 220px;
+}
+
+.my-job-client-cell {
+  min-width: 160px;
+}
+
+.master-cell-stack {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.master-cell-main {
+  color: var(--text);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.master-cell-meta {
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.master-actions-cell,
+.my-jobs-actions-cell {
+  min-width: 130px;
+}
+
+.master-token-link {
+  color: var(--muted);
+}
+
+.my-jobs-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.my-jobs-hero {
+  border-color: color-mix(in srgb, var(--accent) 22%, var(--border));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent) 6%, var(--surface)) 0%,
+    var(--surface) 68%
+  );
+}
+
+.master-actions,
+.my-jobs-actions {
+  margin-top: var(--space-1);
+}
+
 .field {
   margin-bottom: var(--space-3);
 }
@@ -1360,6 +1468,14 @@ body.theme-dark .detail-item {
   background: color-mix(in srgb, var(--surface-2) 34%, var(--surface));
 }
 
+body.theme-dark .my-jobs-hero {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent) 8%, var(--surface)) 0%,
+    var(--surface) 68%
+  );
+}
+
 @media (max-width: 800px) {
   .app-shell {
     width: min(100% - 32px, 1360px);
@@ -1433,6 +1549,11 @@ body.theme-dark .detail-item {
   .clients-table,
   .client-jobs-table {
     min-width: 680px;
+  }
+
+  .masters-table,
+  .my-jobs-table {
+    min-width: 640px;
   }
 }
 
@@ -1533,6 +1654,11 @@ body.theme-dark .detail-item {
   }
 
   .client-actions .btn {
+    flex: 1 1 auto;
+  }
+
+  .master-actions .btn,
+  .my-jobs-actions .btn {
     flex: 1 1 auto;
   }
 }

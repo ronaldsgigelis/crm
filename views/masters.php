@@ -4,9 +4,9 @@
 ?>
 <?php /** @var string|null $error */ ?>
 
-<div class="row">
+<div class="row masters-page">
 
-    <div class="card section">
+    <div class="card section masters-create-panel">
         <div class="section-header">
             <h2 class="section-title">Pievienot meistaru</h2>
         </div>
@@ -15,7 +15,7 @@
             <p class="error"><?= h($error) ?></p>
         <?php endif; ?>
 
-        <form class="form" method="post" action="<?= url('/masters') ?>">
+        <form class="form masters-create-form" method="post" action="<?= url('/masters') ?>">
 
             <!-- Vārds ir obligāts -->
             <div class="field">
@@ -56,41 +56,53 @@
         </form>
     </div>
 
-    <div class="card section">
+    <div class="card section masters-panel">
         <div class="section-header">
             <h2 class="section-title">Meistari</h2>
         </div>
-        <p class="muted">Kopā: <?= count($masters) ?></p>
+        <p class="muted masters-count">Kopā: <?= count($masters) ?></p>
 
-        <div class="table-wrap">
-        <table class="table">
+        <?php if (!$masters): ?>
+            <p class="empty-state">Meistari vēl nav pievienoti.</p>
+        <?php else: ?>
+        <div class="table-wrap masters-table-wrap">
+        <table class="table table-compact masters-table">
             <thead>
                 <tr>
-                    <th class="td-num">ID</th>
-                    <th>Vārds</th>
-                    <th>Telefons</th>
-                    <th>E-pasts</th>
+                    <th>Meistars</th>
+                    <th>Kontaktinformācija</th>
                     <th class="td-nowrap">Links meistaram</th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($masters as $m): ?>
                     <tr>
-                        <td class="td-num"><?= (int)$m['id'] ?></td>
-                        <td><?= h($m['name']) ?></td>
-                        <td><?= h($m['phone'] ?? '') ?></td>
-                        <td><?= h($m['email'] ?? '') ?></td>
-                        <td class="td-nowrap">
+                        <td class="master-name-cell">
+                            <div class="master-cell-stack">
+                                <div class="master-cell-main"><?= h($m['name']) ?></div>
+                                <div class="master-cell-meta">ID: <?= (int)$m['id'] ?></div>
+                            </div>
+                        </td>
+                        <td class="master-contact-cell">
+                            <div class="master-cell-stack">
+                                <div class="master-cell-meta">Telefons: <?= h($m['phone'] ?? '') ?></div>
+                                <div class="master-cell-meta">E-pasts: <?= h($m['email'] ?? '') ?></div>
+                            </div>
+                        </td>
+                        <td class="td-nowrap master-actions-cell">
+                            <div class="table-actions master-actions">
                             <!-- Atver meistara publisko darba lapu jaunā cilnē -->
-                            <a class="btn btn-secondary btn-small" href="<?= url('/my-jobs?token=' . h($m['token'])) ?>" target="_blank">
+                            <a class="btn btn-secondary btn-small master-token-link" href="<?= url('/my-jobs?token=' . h($m['token'])) ?>" target="_blank">
                                 Atvērt "my-jobs"
                             </a>
+                            </div>
                         </td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
         </div>
+        <?php endif; ?>
     </div>
 
 </div>
