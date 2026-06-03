@@ -1172,6 +1172,73 @@ button {
   margin-top: var(--space-1);
 }
 
+.invoice-show-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.invoice-show-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 0.9fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.invoice-show-main,
+.invoice-show-side,
+.invoice-preview-panel {
+  min-width: 0;
+}
+
+.invoice-show-side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.invoice-show-detail-grid {
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+
+.invoice-payment-panel,
+.invoice-actions-panel,
+.invoice-danger-panel {
+  gap: var(--space-3);
+}
+
+.invoice-payment-panel .invoice-payment-status {
+  margin: 0;
+}
+
+.invoice-payment-form .btn,
+.invoice-danger-panel .btn {
+  width: 100%;
+}
+
+.invoice-show-actions {
+  align-items: stretch;
+  margin-top: 0;
+}
+
+.invoice-show-actions .btn {
+  flex: 1 1 auto;
+}
+
+.invoice-danger-panel {
+  border-color: color-mix(in srgb, var(--danger) 24%, var(--border));
+}
+
+.invoice-danger-panel .invoice-danger-actions {
+  display: flex;
+  padding-left: 0;
+  border-left: 0;
+}
+
+.invoice-preview-panel {
+  gap: var(--space-4);
+}
+
 .field {
   margin-bottom: var(--space-3);
 }
@@ -1476,6 +1543,10 @@ body.theme-dark .my-jobs-hero {
   );
 }
 
+body.theme-dark .invoice-danger-panel {
+  border-color: color-mix(in srgb, var(--danger) 34%, var(--border));
+}
+
 @media (max-width: 800px) {
   .app-shell {
     width: min(100% - 32px, 1360px);
@@ -1554,6 +1625,10 @@ body.theme-dark .my-jobs-hero {
   .masters-table,
   .my-jobs-table {
     min-width: 640px;
+  }
+
+  .invoice-show-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1660,5 +1735,10 @@ body.theme-dark .my-jobs-hero {
   .master-actions .btn,
   .my-jobs-actions .btn {
     flex: 1 1 auto;
+  }
+
+  .invoice-payment-form,
+  .invoice-danger-panel .table-actions-form {
+    width: 100%;
   }
 }
