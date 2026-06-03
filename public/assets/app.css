@@ -28,7 +28,7 @@ body.theme-dark {
   --surface-2: #1e2329;
   --text: #eaecef;
   --muted: #9aa4b2;
-  --border: #2b3139;
+  --border: #333946;
   --accent: #f0b90b;
   --accent-hover: #f8d33a;
   --danger: #f6465d;
@@ -42,6 +42,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: Arial, sans-serif;
+  line-height: 1.45;
   margin: 0;
 }
 
@@ -182,6 +183,10 @@ button {
   box-shadow: var(--shadow);
 }
 
+.card-compact {
+  padding: var(--space-3);
+}
+
 .content-stack > .card,
 .content-stack > .section {
   margin-top: 0;
@@ -191,6 +196,10 @@ button {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+}
+
+.section-dense {
+  gap: var(--space-2);
 }
 
 .section-header {
@@ -277,6 +286,17 @@ button {
   padding: 8px 12px;
   text-decoration: none;
   cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn:hover {
+  border-color: color-mix(in srgb, var(--border) 65%, var(--text));
+  background: color-mix(in srgb, var(--surface-2) 70%, var(--surface));
+}
+
+.btn:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 42%, transparent);
+  outline-offset: 2px;
 }
 
 .btn-primary {
@@ -292,6 +312,11 @@ button {
 
 .btn-secondary {
   background: var(--surface-2);
+}
+
+.btn-secondary:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  background: color-mix(in srgb, var(--surface-2) 72%, var(--accent));
 }
 
 .btn-danger {
@@ -323,6 +348,7 @@ button {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   margin-top: 12px;
+  background: var(--surface);
 }
 
 .table {
@@ -331,28 +357,48 @@ button {
   margin-top: 0;
   background: var(--surface);
   font-size: 0.95rem;
+  line-height: 1.35;
 }
 
 .table th,
 .table td {
   border: 0;
   border-bottom: 1px solid var(--border);
-  padding: 10px 12px;
+  padding: 9px 12px;
   vertical-align: top;
 }
 
 .table th {
-  background: var(--surface-2);
+  background: color-mix(in srgb, var(--surface-2) 82%, var(--surface));
   color: var(--text);
+  font-size: 0.875rem;
   font-weight: 700;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
 }
 
 .table tbody tr:hover {
-  background: color-mix(in srgb, var(--surface-2) 55%, transparent);
+  background: color-mix(in srgb, var(--surface-2) 68%, transparent);
+}
+
+.table tbody tr:focus-within {
+  background: color-mix(in srgb, var(--accent) 9%, var(--surface));
 }
 
 .table tbody tr:last-child td {
   border-bottom: 0;
+}
+
+.table.table-compact th,
+.table.table-compact td,
+.table-compact .table th,
+.table-compact .table td {
+  padding: 7px 10px;
+}
+
+.table.table-compact,
+.table-compact .table {
+  font-size: 0.9rem;
 }
 
 .table-actions {
@@ -379,9 +425,18 @@ button {
 .td-num {
   text-align: right;
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 .td-nowrap {
+  white-space: nowrap;
+}
+
+.td-date,
+.metadata {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
@@ -509,8 +564,17 @@ button {
   margin-top: var(--space-1);
 }
 
+.text-muted,
 .muted {
   color: var(--muted);
+}
+
+.empty-state {
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface-2) 34%, var(--surface));
+  color: var(--muted);
+  padding: var(--space-4);
 }
 
 .error {
@@ -524,7 +588,9 @@ button {
   border: 1px solid transparent;
   padding: 2px 8px;
   font-size: 0.875rem;
+  font-weight: 600;
   line-height: 1.4;
+  white-space: nowrap;
 }
 
 .badge-neutral {
@@ -698,6 +764,58 @@ button {
   display: inline;
 }
 
+body.theme-dark .card,
+body.theme-dark .top-nav,
+body.theme-dark .table-wrap {
+  box-shadow: none;
+}
+
+body.theme-dark .table th {
+  background: color-mix(in srgb, var(--surface-2) 86%, #000000);
+}
+
+body.theme-dark .table tbody tr:hover {
+  background: color-mix(in srgb, var(--surface-2) 78%, transparent);
+}
+
+body.theme-dark .btn-secondary {
+  border-color: color-mix(in srgb, var(--border) 88%, var(--text));
+}
+
+body.theme-dark .btn-secondary:hover {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+  background: color-mix(in srgb, var(--surface-2) 78%, var(--accent));
+}
+
+body.theme-dark .badge-neutral,
+body.theme-dark .badge-status-new,
+body.theme-dark .badge-invoice-manual {
+  color: color-mix(in srgb, var(--muted) 86%, var(--text));
+}
+
+body.theme-dark .badge-success,
+body.theme-dark .badge-status-done,
+body.theme-dark .badge-payment-paid {
+  background: color-mix(in srgb, var(--success) 16%, transparent);
+}
+
+body.theme-dark .badge-warning,
+body.theme-dark .badge-status-in-progress,
+body.theme-dark .badge-payment-unpaid {
+  background: color-mix(in srgb, var(--warning) 18%, transparent);
+}
+
+body.theme-dark .badge-danger,
+body.theme-dark .badge-status-canceled,
+body.theme-dark .badge-payment-overdue {
+  background: color-mix(in srgb, var(--danger) 17%, transparent);
+}
+
+body.theme-dark .badge-info,
+body.theme-dark .badge-invoice-crm {
+  background: color-mix(in srgb, var(--info) 17%, transparent);
+}
+
 @media (max-width: 800px) {
   .app-shell {
     width: min(100% - 32px, 1360px);
@@ -736,5 +854,51 @@ button {
 
   .profile-form-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .app-shell {
+    width: min(100% - 24px, 1360px);
+  }
+
+  .top-nav {
+    gap: var(--space-1);
+    padding: var(--space-1);
+  }
+
+  .nav-link {
+    min-height: 32px;
+    padding: 6px 8px;
+  }
+
+  .card {
+    padding: var(--space-3);
+  }
+
+  .section-actions,
+  .form-actions,
+  .table-actions {
+    align-items: stretch;
+    gap: var(--space-2);
+  }
+
+  .section-actions > .btn,
+  .form-actions > .btn,
+  .table-actions > .btn,
+  .table-actions > .table-actions-form {
+    flex: 1 1 auto;
+  }
+
+  .filter-bar {
+    gap: var(--space-2);
+  }
+
+  .btn {
+    min-height: 36px;
+  }
+
+  .btn-small {
+    min-height: 30px;
   }
 }
