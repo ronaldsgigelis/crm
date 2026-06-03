@@ -15,48 +15,69 @@
 
 <?php else: ?>
 
-    <div class="card section">
+    <div class="client-detail-page">
+    <div class="card section client-detail-panel">
         <!-- Klienta pamatinformācija -->
         <div class="section-header">
-            <h2 class="section-title">Klienta kartīte - <?= h($client['name']) ?></h2>
+            <div>
+                <h2 class="section-title">Klienta kartīte - <?= h($client['name']) ?></h2>
+                <p class="metadata">Klienta profils</p>
+            </div>
         </div>
 
-        <p><strong>ID:</strong> <?= (int)$client['id'] ?></p>
-        <p><strong>Vārds:</strong> <?= h($client['name']) ?></p>
-        <p><strong>Tālrunis:</strong> <?= h($client['phone'] ?? '') ?></p>
-        <p><strong>E-pasts:</strong> <?= h($client['email'] ?? '') ?></p>
-        <p><strong>Izveidots:</strong> <?= h($client['created_at']) ?></p>
-
-        <hr>
-
-        <!-- Īsa statistika par klientu -->
-        <p><strong>Darbu skaits:</strong> <?= (int)$jobsCount ?></p>
-        <p><strong>Kopējā darbu summa:</strong> <?= number_format($totalAmount, 2, '.', '') ?></p>
+        <div class="detail-grid client-detail-grid">
+            <div class="detail-item">
+                <div class="detail-label">ID</div>
+                <div class="detail-value"><?= (int)$client['id'] ?></div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Vārds</div>
+                <div class="detail-value"><?= h($client['name']) ?></div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Tālrunis</div>
+                <div class="detail-value"><?= h($client['phone'] ?? '') ?></div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">E-pasts</div>
+                <div class="detail-value"><?= h($client['email'] ?? '') ?></div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Izveidots</div>
+                <div class="detail-value"><?= h($client['created_at']) ?></div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Darbu skaits</div>
+                <div class="detail-value"><?= (int)$jobsCount ?></div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Kopējā darbu summa</div>
+                <div class="detail-value"><?= number_format($totalAmount, 2, '.', '') ?></div>
+            </div>
+        </div>
 
         <div class="section-actions mt-3">
             <a class="btn btn-secondary" href="<?= url('/clients') ?>">← Atpakaļ uz klientiem</a>
         </div>
     </div>
 
-    <div class="card section">
+    <div class="card section client-jobs-panel">
         <div class="section-header">
             <h2 class="section-title">Klienta darbu vēsture</h2>
         </div>
 
         <?php if (!$jobs): ?>
-            <p class="muted">Šim klientam vēl nav neviena darba.</p>
+            <p class="empty-state">Šim klientam vēl nav neviena darba.</p>
         <?php else: ?>
-            <div class="table-wrap">
-            <table class="table">
+            <div class="table-wrap client-jobs-table-wrap">
+            <table class="table table-compact client-jobs-table">
                 <thead>
                     <tr>
-                        <th class="td-num">ID</th>
-                        <th>Virsraksts</th>
+                        <th>Darbs</th>
                         <th class="td-nowrap">Statuss</th>
                         <th class="td-num">Cena</th>
-                        <th class="td-nowrap">Plānots</th>
-                        <th>Meistars</th>
-                        <th class="td-nowrap">Atvērt</th>
+                        <th class="td-nowrap">Plānots / meistars</th>
+                        <th class="td-nowrap">Darbības</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -72,18 +93,28 @@
                         ][$jobStatus] ?? 'badge-neutral badge-status-new';
                         ?>
                         <tr>
-                            <td class="td-num"><?= (int)$j['id'] ?></td>
-                            <td><?= h($j['title']) ?></td>
+                            <td class="client-job-title-cell">
+                                <div class="client-cell-stack">
+                                    <div class="client-cell-main"><?= h($j['title']) ?></div>
+                                    <div class="client-cell-meta">ID: <?= (int)$j['id'] ?></div>
+                                </div>
+                            </td>
 
                             <!-- Statusu rādam latviski ar helperi -->
                             <td class="td-nowrap"><span class="badge <?= h($jobStatusBadgeClass) ?>"><?= h(job_status_label($j['status'])) ?></span></td>
 
                             <td class="td-num"><?= h($j['price'] ?? '') ?></td>
-                            <td class="td-nowrap"><?= h($j['scheduled_at'] ?? '') ?></td>
-                            <td><?= h($j['master_name'] ?? '') ?></td>
+                            <td class="td-nowrap client-job-meta-cell">
+                                <div class="client-cell-stack">
+                                    <div class="client-cell-meta">Plānots: <?= h($j['scheduled_at'] ?? '') ?></div>
+                                    <div class="client-cell-meta">Meistars: <?= h($j['master_name'] ?? '') ?></div>
+                                </div>
+                            </td>
 
-                            <td class="td-nowrap">
+                            <td class="td-nowrap client-actions-cell">
+                                <div class="table-actions client-actions">
                                 <a class="btn btn-secondary btn-small" href="<?= url('/job?id=' . (int)$j['id']) ?>">Darba kartīte</a>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -92,6 +123,7 @@
             </table>
             </div>
         <?php endif; ?>
+    </div>
     </div>
 
 <?php endif; ?>
