@@ -13,10 +13,10 @@
 
 <!-- View: darbu pievienošana + darbu saraksts -->
 
-<div class="row">
+<div class="row jobs-page">
 
   <!-- Darba pievienošanas forma -->
-  <div class="card section">
+  <div class="card section jobs-create-panel">
     <div class="section-header">
       <h2 class="section-title">Pievienot darbu</h2>
     </div>
@@ -27,7 +27,7 @@
     <?php endif; ?>
 
     <!-- POST forma uz /jobs -->
-    <form class="form" method="post" action="<?= url('/jobs') ?>">
+    <form class="form jobs-create-form" method="post" action="<?= url('/jobs') ?>">
 
       <!-- Klienta izvēle -->
       <div class="field">
@@ -107,16 +107,16 @@
   </div>
 
   <!-- Darbu saraksts -->
-  <div class="card section">
+  <div class="card section jobs-panel">
     <div class="section-header">
       <h2 class="section-title">Darbu saraksts</h2>
     </div>
 
     <!-- Darbu skaits -->
-    <p class="muted">Kopā: <?= count($jobs) ?></p>
+    <p class="muted jobs-count">Kopā: <?= count($jobs) ?></p>
 
     <!-- Filtri -->
-    <form class="form form-section filter-bar" method="get" action="<?= url('/jobs') ?>">
+    <form class="form form-section filter-bar jobs-filter-bar" method="get" action="<?= url('/jobs') ?>">
 
       <!-- Filtrs pēc meistara -->
       <div class="form-grid filter-group">
@@ -187,18 +187,19 @@
       </div>
     </form>
 
-    <div class="table-wrap">
-    <table class="table">
+    <?php if (!$jobs): ?>
+      <p class="empty-state">Darbi šiem filtriem nav atrasti.</p>
+    <?php else: ?>
+    <div class="table-wrap jobs-table-wrap">
+    <table class="table table-compact jobs-table">
       <thead>
         <tr>
-          <th class="td-num">ID</th>
-          <th>Klients</th>
-          <th>Virsraksts</th>
+          <th>Darbs</th>
+          <th>Klients / meistars</th>
           <th class="td-nowrap">Statuss</th>
           <th class="td-num">Cena</th>
-          <th>Meistars</th>
           <th class="td-nowrap">Rēķins</th>
-          <th class="td-nowrap">Atvērt</th>
+          <th class="td-nowrap">Darbības</th>
         </tr>
       </thead>
       <tbody>
@@ -213,25 +214,33 @@
           ][$jobStatus] ?? 'badge-neutral badge-status-new';
           ?>
           <tr>
-            <td class="td-num"><?= (int)$j['id'] ?></td>
-            <td><?= h($j['client_name']) ?></td>
-            <td><?= h($j['title']) ?></td>
+            <td class="job-title-cell">
+              <div class="job-cell-stack">
+                <div class="job-cell-main"><?= h($j['title']) ?></div>
+                <div class="job-cell-meta">ID: <?= (int)$j['id'] ?></div>
+                <div class="job-cell-meta">Plānots: <?= h($j['scheduled_at'] ?? '') !== '' ? h($j['scheduled_at']) : 'nav norādīts' ?></div>
+              </div>
+            </td>
+            <td class="job-party-cell">
+              <div class="job-cell-stack">
+                <div class="job-cell-main"><?= h($j['client_name']) ?></div>
+                <div class="job-cell-meta">Meistars: <?= h($j['master_name'] ?? '') ?></div>
+              </div>
+            </td>
 
             <!-- Statusu lietotājam rādam latviski -->
-            <td class="td-nowrap"><span class="badge <?= h($jobStatusBadgeClass) ?>"><?= h(job_status_label($j['status'])) ?></span></td>
+            <td class="td-nowrap job-status-cell"><span class="badge <?= h($jobStatusBadgeClass) ?>"><?= h(job_status_label($j['status'])) ?></span></td>
 
             <td class="td-num"><?= h($j['price'] ?? '') ?></td>
 
-            <!-- Meistars var būt tukšs -->
-            <td><?= h($j['master_name'] ?? '') ?></td>
-
-            <td class="td-nowrap">
+            <td class="td-nowrap job-invoice-cell">
               <?php if (!empty($j['invoice_id'])): ?>
-                <div>Ir rēķins</div>
+                <div class="job-cell-stack">
+                <div class="job-cell-main">Ir rēķins</div>
                 <?php if (!empty($j['invoice_number'])): ?>
-                  <div><?= h($j['invoice_number']) ?></div>
+                  <div class="job-cell-meta"><?= h($j['invoice_number']) ?></div>
                 <?php endif; ?>
-                <div>
+                <div class="job-cell-meta">
                   Apmaksa:
                   <?= h(invoice_payment_status_label([
                     'payment_status' => $j['invoice_payment_status'] ?? 'unpaid',
@@ -239,23 +248,33 @@
                     'due_date' => $j['invoice_due_date'] ?? null,
                   ])) ?>
                 </div>
+                <div class="table-actions job-invoice-actions">
                 <a class="btn btn-secondary btn-small" href="<?= url('/invoice?id=' . (int)$j['invoice_id']) ?>">Skatīt</a>
                 <a class="btn btn-secondary btn-small" href="<?= url('/invoice-pdf?id=' . (int)$j['invoice_id']) ?>">PDF</a>
+                </div>
+                </div>
               <?php else: ?>
-                <div>Nav rēķina</div>
+                <div class="job-cell-stack">
+                <div class="job-cell-main">Nav rēķina</div>
+                <div class="table-actions job-invoice-actions">
                 <a class="btn btn-primary btn-small" href="<?= url('/invoice-create?job_id=' . (int)$j['id']) ?>">Sagatavot rēķinu</a>
+                </div>
+                </div>
               <?php endif; ?>
             </td>
 
             <!-- Saite uz darba kartīti -->
-            <td class="td-nowrap">
+            <td class="td-nowrap job-actions-cell">
+              <div class="table-actions job-actions">
               <a class="btn btn-secondary btn-small" href="<?= url('/job?id=' . (int)$j['id']) ?>">Darba kartīte</a>
+              </div>
             </td>
           </tr>
         <?php endforeach; ?>
       </tbody>
     </table>
     </div>
+    <?php endif; ?>
 
   </div>
 

@@ -789,6 +789,103 @@ button {
   text-align: left;
 }
 
+.jobs-page {
+  align-items: start;
+  grid-template-columns: minmax(260px, 300px) minmax(0, 1fr);
+  gap: var(--space-5);
+}
+
+.jobs-page > .card {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.jobs-create-panel,
+.jobs-panel {
+  width: 100%;
+  min-width: 0;
+}
+
+.jobs-create-panel {
+  gap: var(--space-4);
+}
+
+.jobs-create-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.jobs-panel {
+  gap: var(--space-4);
+}
+
+.jobs-count {
+  font-variant-numeric: tabular-nums;
+}
+
+.jobs-filter-bar {
+  align-items: flex-end;
+  border: 1px solid color-mix(in srgb, var(--border) 74%, transparent);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface-2) 28%, var(--surface));
+  padding: var(--space-3);
+}
+
+.jobs-table {
+  min-width: 780px;
+}
+
+.jobs-table-wrap {
+  width: 100%;
+  max-width: 100%;
+}
+
+.job-title-cell {
+  min-width: 190px;
+}
+
+.job-party-cell {
+  min-width: 160px;
+}
+
+.job-cell-stack {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.job-cell-main {
+  color: var(--text);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.job-cell-meta {
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.job-status-cell {
+  min-width: 100px;
+}
+
+.job-invoice-cell {
+  min-width: 170px;
+}
+
+.job-invoice-actions,
+.job-actions {
+  margin-top: var(--space-1);
+}
+
+.job-actions-cell {
+  min-width: 120px;
+}
+
 .field {
   margin-bottom: var(--space-3);
 }
@@ -1075,6 +1172,11 @@ body.theme-dark .invoice-danger-actions {
   border-left-color: color-mix(in srgb, var(--border) 82%, var(--text));
 }
 
+body.theme-dark .jobs-filter-bar {
+  border-color: color-mix(in srgb, var(--border) 82%, var(--text));
+  background: color-mix(in srgb, var(--surface-2) 38%, var(--surface));
+}
+
 @media (max-width: 800px) {
   .app-shell {
     width: min(100% - 32px, 1360px);
@@ -1134,6 +1236,10 @@ body.theme-dark .invoice-danger-actions {
 
   .invoice-table {
     min-width: 780px;
+  }
+
+  .jobs-table {
+    min-width: 820px;
   }
 }
 
@@ -1212,5 +1318,14 @@ body.theme-dark .invoice-danger-actions {
     padding-left: 0;
     border-top: 1px solid var(--border);
     border-left: 0;
+  }
+
+  .jobs-filter-bar {
+    padding: var(--space-2);
+  }
+
+  .job-invoice-actions .btn,
+  .job-actions .btn {
+    flex: 1 1 auto;
   }
 }
