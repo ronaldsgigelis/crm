@@ -43,8 +43,8 @@
     <?php if (!empty($invoice)): ?>
       <p class="section-actions">
         <strong>Rēķins jau izveidots:</strong> <?= h($invoice['invoice_number']) ?>
-        <a class="btn btn-secondary btn-small" href="<?= url('/invoice?id=' . (int)$invoice['id']) ?>" style="margin-left:8px;">Skatīt rēķinu</a>
-        <a class="btn btn-secondary btn-small" href="<?= url('/invoice-pdf?id=' . (int)$invoice['id']) ?>" style="margin-left:8px;">Lejupielādēt PDF</a>
+        <a class="btn btn-secondary btn-small" href="<?= url('/invoice?id=' . (int)$invoice['id']) ?>">Skatīt rēķinu</a>
+        <a class="btn btn-secondary btn-small" href="<?= url('/invoice-pdf?id=' . (int)$invoice['id']) ?>">Lejupielādēt PDF</a>
       </p>
     <?php else: ?>
       <p class="section-actions">

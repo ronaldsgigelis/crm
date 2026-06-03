@@ -164,7 +164,7 @@
 
       <!-- Checkbox filtrs: tikai darbi bez piešķirta meistara -->
       <div class="form-actions filter-group">
-        <label style="display:inline-flex; align-items:center; gap:8px; white-space:nowrap;">
+        <label class="checkbox-inline">
           <span>Tikai bez meistara</span>
           <input
             type="checkbox"
@@ -173,7 +173,7 @@
             <?= !empty($withoutMaster) ? 'checked' : '' ?>>
         </label>
 
-        <label style="display:inline-flex; align-items:center; gap:8px; white-space:nowrap; margin-left:10px;">
+        <label class="checkbox-inline">
           <span>Bez rēķina</span>
           <input
             type="checkbox"

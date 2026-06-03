@@ -101,7 +101,7 @@
           <td class="td-num"><?= number_format((float)$invoice['total'], 2, '.', '') ?> <?= h($invoice['currency']) ?></td>
           <td class="td-nowrap">
             <div><span class="badge <?= h($invoicePaymentBadgeClass) ?>"><?= h($invoicePaymentLabel) ?></span></div>
-            <form method="post" action="<?= url('/invoice-payment-status') ?>" style="display:inline;">
+            <form class="table-actions-form" method="post" action="<?= url('/invoice-payment-status') ?>">
               <input type="hidden" name="invoice_id" value="<?= (int)$invoice['id'] ?>">
               <input type="hidden" name="source" value="list">
               <input type="hidden" name="type" value="<?= h($typeFilter ?? 'all') ?>">
@@ -116,14 +116,14 @@
           <td class="td-nowrap">
             <div class="table-actions">
               <a class="btn btn-secondary btn-small" href="<?= url('/invoice?id=' . (int)$invoice['id']) ?>">Skatīt</a>
-              <a class="btn btn-secondary btn-small" href="<?= url('/invoice-pdf?id=' . (int)$invoice['id']) ?>" style="margin-left:8px;">PDF</a>
+              <a class="btn btn-secondary btn-small" href="<?= url('/invoice-pdf?id=' . (int)$invoice['id']) ?>">PDF</a>
               <?php if (!empty($invoice['job_id'])): ?>
-                <a class="btn btn-secondary btn-small" href="<?= url('/job?id=' . (int)$invoice['job_id']) ?>" style="margin-left:8px;">Darbs</a>
+                <a class="btn btn-secondary btn-small" href="<?= url('/job?id=' . (int)$invoice['job_id']) ?>">Darbs</a>
               <?php endif; ?>
               <form
+                class="table-actions-form"
                 method="post"
                 action="<?= url('/invoice-delete') ?>"
-                style="display:inline;"
                 onsubmit="return confirm('Vai tiešām dzēst šo rēķinu? Ja rēķins jau nosūtīts klientam vai izmantots grāmatvedībā, dzēšana nav ieteicama.');">
                 <input type="hidden" name="invoice_id" value="<?= (int)$invoice['id'] ?>">
                 <button class="btn btn-danger btn-small" type="submit">Dzēst</button>

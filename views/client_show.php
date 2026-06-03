@@ -33,9 +33,9 @@
         <p><strong>Darbu skaits:</strong> <?= (int)$jobsCount ?></p>
         <p><strong>Kopējā darbu summa:</strong> <?= number_format($totalAmount, 2, '.', '') ?></p>
 
-        <p class="section-actions" style="margin-top:12px;">
+        <div class="section-actions mt-3">
             <a class="btn btn-secondary" href="<?= url('/clients') ?>">← Atpakaļ uz klientiem</a>
-        </p>
+        </div>
     </div>
 
     <div class="card section">
