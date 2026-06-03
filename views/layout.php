@@ -22,6 +22,16 @@
 </head>
 
 <body>
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem('crmTheme') === 'dark') {
+          document.body.classList.add('theme-dark');
+        }
+      } catch (error) {
+      }
+    })();
+  </script>
   <div class="app-shell">
     <!-- Galvenā navigācija -->
     <nav class="top-nav" aria-label="Galvenā navigācija">
@@ -32,6 +42,7 @@
       <a class="nav-link <?= path() === '/invoices' ? 'nav-link-active' : '' ?>" href="<?= url('/invoices') ?>">Rēķini</a>
       <a class="nav-link <?= path() === '/invoice-settings' ? 'nav-link-active' : '' ?>" href="<?= url('/invoice-settings') ?>">Rēķinu iestatījumi</a>
       <a class="nav-link <?= path() === '/manual-invoice' ? 'nav-link-active' : '' ?>" href="<?= url('/manual-invoice') ?>">Rēķinu ģenerators</a>
+      <button type="button" class="nav-link theme-toggle" data-theme-toggle aria-pressed="false">Dark</button>
     </nav>
 
     <main class="page">
@@ -47,6 +58,7 @@
     </main>
   </div>
 
+  <script src="<?= url('/assets/app.js') ?>"></script>
 </body>
 
 </html>
