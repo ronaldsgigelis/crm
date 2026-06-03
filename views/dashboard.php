@@ -44,11 +44,13 @@
   <div class="section-header">
     <h2 class="section-title">Ātrās saites</h2>
   </div>
-  <p class="section-actions"><a class="btn btn-secondary btn-small" href="<?= url('/jobs?without_invoice=1') ?>">Darbi bez rēķina</a></p>
-  <p class="section-actions"><a class="btn btn-secondary btn-small" href="<?= url('/invoices?type=all&payment=unpaid') ?>">Neapmaksāti rēķini</a></p>
-  <p class="section-actions"><a class="btn btn-secondary btn-small" href="<?= url('/invoices?type=all&payment=overdue') ?>">Kavēti rēķini</a></p>
-  <p class="section-actions"><a class="btn btn-secondary btn-small" href="<?= url('/invoices') ?>">Visi rēķini</a></p>
-  <p class="section-actions"><a class="btn btn-secondary btn-small" href="<?= url('/manual-invoice') ?>">Manuāls rēķins</a></p>
+  <div class="section-actions">
+    <a class="btn btn-secondary btn-small" href="<?= url('/jobs?without_invoice=1') ?>">Darbi bez rēķina</a>
+    <a class="btn btn-secondary btn-small" href="<?= url('/invoices?type=all&payment=unpaid') ?>">Neapmaksāti rēķini</a>
+    <a class="btn btn-secondary btn-small" href="<?= url('/invoices?type=all&payment=overdue') ?>">Kavēti rēķini</a>
+    <a class="btn btn-secondary btn-small" href="<?= url('/invoices') ?>">Visi rēķini</a>
+    <a class="btn btn-secondary btn-small" href="<?= url('/manual-invoice') ?>">Manuāls rēķins</a>
+  </div>
 </div>
 
 <div class="card section">

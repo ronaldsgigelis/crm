@@ -21,37 +21,41 @@
 
   <div class="card section">
     <div class="section-header">
-      <h1 class="section-title">Rēķins</h1>
+      <h2 class="section-title">Rēķins</h2>
     </div>
 
     <?php if (!empty($error)): ?>
       <p class="error"><?= h($error) ?></p>
     <?php endif; ?>
 
-    <?php if (!empty($invoice['job_id'])): ?>
-      <p class="section-actions"><a class="btn btn-secondary" href="<?= url('/job?id=' . (int)$invoice['job_id']) ?>">Atvērt saistīto darbu</a></p>
-    <?php endif; ?>
-
     <p><strong>Apmaksa:</strong> <span class="badge <?= h($invoicePaymentBadgeClass) ?>"><?= h($invoicePaymentLabel) ?></span></p>
-    <form method="post" action="<?= url('/invoice-payment-status') ?>">
-      <input type="hidden" name="invoice_id" value="<?= (int)$invoice['id'] ?>">
-      <input type="hidden" name="source" value="show">
-      <?php if (($invoice['payment_status'] ?? 'unpaid') === 'paid'): ?>
-        <button class="btn btn-warning" type="submit" name="action" value="mark_unpaid">Atcelt apmaksu</button>
-      <?php else: ?>
-        <button class="btn btn-success" type="submit" name="action" value="mark_paid">Atzīmēt kā apmaksātu</button>
+
+    <div class="section-actions">
+      <?php if (!empty($invoice['job_id'])): ?>
+        <a class="btn btn-secondary" href="<?= url('/job?id=' . (int)$invoice['job_id']) ?>">Atvērt saistīto darbu</a>
       <?php endif; ?>
-    </form>
 
-    <p class="section-actions"><a class="btn btn-secondary" href="<?= url('/invoice-pdf?id=' . (int)$invoice['id']) ?>">Lejupielādēt PDF</a></p>
+      <form class="table-actions-form" method="post" action="<?= url('/invoice-payment-status') ?>">
+        <input type="hidden" name="invoice_id" value="<?= (int)$invoice['id'] ?>">
+        <input type="hidden" name="source" value="show">
+        <?php if (($invoice['payment_status'] ?? 'unpaid') === 'paid'): ?>
+          <button class="btn btn-warning" type="submit" name="action" value="mark_unpaid">Atcelt apmaksu</button>
+        <?php else: ?>
+          <button class="btn btn-success" type="submit" name="action" value="mark_paid">Atzīmēt kā apmaksātu</button>
+        <?php endif; ?>
+      </form>
 
-    <form
-      method="post"
-      action="<?= url('/invoice-delete') ?>"
-      onsubmit="return confirm('Vai tiešām dzēst šo rēķinu? Ja rēķins jau nosūtīts klientam vai izmantots grāmatvedībā, dzēšana nav ieteicama.');">
-      <input type="hidden" name="invoice_id" value="<?= (int)$invoice['id'] ?>">
-      <button class="btn btn-danger" type="submit">Dzēst rēķinu</button>
-    </form>
+      <a class="btn btn-secondary" href="<?= url('/invoice-pdf?id=' . (int)$invoice['id']) ?>">Lejupielādēt PDF</a>
+
+      <form
+        class="table-actions-form"
+        method="post"
+        action="<?= url('/invoice-delete') ?>"
+        onsubmit="return confirm('Vai tiešām dzēst šo rēķinu? Ja rēķins jau nosūtīts klientam vai izmantots grāmatvedībā, dzēšana nav ieteicama.');">
+        <input type="hidden" name="invoice_id" value="<?= (int)$invoice['id'] ?>">
+        <button class="btn btn-danger" type="submit">Dzēst rēķinu</button>
+      </form>
+    </div>
   </div>
 
   <div class="card section invoice-preview-wrap">

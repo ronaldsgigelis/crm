@@ -94,6 +94,11 @@ h1 {
   color: var(--text);
 }
 
+.nav-link:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  outline-offset: 2px;
+}
+
 .theme-toggle {
   border: 0;
   background: transparent;
@@ -353,8 +358,22 @@ button {
 .table-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
+  gap: var(--space-2) var(--space-2);
   align-items: center;
+}
+
+.table td > div + .table-actions-form {
+  display: block;
+  margin-top: var(--space-3);
+}
+
+.table td > div + .table-actions-form .btn {
+  margin-top: var(--space-1);
+}
+
+.table-actions .table-actions-form {
+  display: inline-flex;
+  margin-top: 0;
 }
 
 .td-num {
@@ -603,6 +622,12 @@ button {
   --text: #111827;
   --muted: #666666;
   --border: #dddddd;
+  --accent: #f0b90b;
+  --accent-hover: #d9a500;
+  --danger: #b00020;
+  --success: #16803c;
+  --warning: #b7791f;
+  --info: #2563eb;
   width: 794px;
   max-width: 100%;
   min-height: 1123px;
