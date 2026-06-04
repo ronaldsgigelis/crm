@@ -1239,6 +1239,104 @@ button {
   gap: var(--space-4);
 }
 
+.invoice-form-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.invoice-form {
+  display: block;
+}
+
+.invoice-form-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(300px, 0.82fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.invoice-form-main,
+.invoice-form-side,
+.invoice-form-panel {
+  min-width: 0;
+}
+
+.invoice-form-main,
+.invoice-form-side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.invoice-form-panel {
+  gap: var(--space-4);
+}
+
+.invoice-form-section {
+  border-color: color-mix(in srgb, var(--border) 82%, transparent);
+}
+
+.invoice-form-fields {
+  gap: var(--space-4);
+}
+
+.invoice-form-fields .field {
+  margin-bottom: 0;
+}
+
+.invoice-items-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface-2) 24%, var(--surface));
+  padding: var(--space-3);
+}
+
+.invoice-items-table {
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.85fr);
+  margin: 0;
+}
+
+.invoice-service-field textarea {
+  min-height: 150px;
+}
+
+.invoice-form-summary {
+  min-width: 0;
+}
+
+.invoice-money-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.invoice-job-context {
+  border-color: color-mix(in srgb, var(--accent) 22%, var(--border));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent) 6%, var(--surface)) 0%,
+    var(--surface) 70%
+  );
+}
+
+.invoice-context-grid {
+  grid-template-columns: 1fr;
+}
+
+.invoice-form-actions {
+  position: sticky;
+  top: var(--space-4);
+}
+
+.invoice-form-actions .form-actions {
+  align-items: stretch;
+  margin-top: 0;
+}
+
+.invoice-form-actions .btn {
+  width: 100%;
+}
+
 .field {
   margin-bottom: var(--space-3);
 }
@@ -1547,6 +1645,23 @@ body.theme-dark .invoice-danger-panel {
   border-color: color-mix(in srgb, var(--danger) 34%, var(--border));
 }
 
+body.theme-dark .invoice-form-section {
+  border-color: color-mix(in srgb, var(--border) 84%, var(--text));
+}
+
+body.theme-dark .invoice-items-wrap {
+  border-color: color-mix(in srgb, var(--border) 82%, var(--text));
+  background: color-mix(in srgb, var(--surface-2) 34%, var(--surface));
+}
+
+body.theme-dark .invoice-job-context {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent) 8%, var(--surface)) 0%,
+    var(--surface) 70%
+  );
+}
+
 @media (max-width: 800px) {
   .app-shell {
     width: min(100% - 32px, 1360px);
@@ -1629,6 +1744,15 @@ body.theme-dark .invoice-danger-panel {
 
   .invoice-show-grid {
     grid-template-columns: 1fr;
+  }
+
+  .invoice-form-grid,
+  .invoice-items-table {
+    grid-template-columns: 1fr;
+  }
+
+  .invoice-form-actions {
+    position: static;
   }
 }
 
@@ -1740,5 +1864,14 @@ body.theme-dark .invoice-danger-panel {
   .invoice-payment-form,
   .invoice-danger-panel .table-actions-form {
     width: 100%;
+  }
+
+  .invoice-form-fields,
+  .invoice-money-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .invoice-items-wrap {
+    padding: var(--space-2);
   }
 }
