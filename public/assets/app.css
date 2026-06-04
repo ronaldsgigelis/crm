@@ -1695,22 +1695,6 @@ button {
   white-space: nowrap;
 }
 
-
-.invoice-settings-selector label {
-  flex: 0 0 auto;
-  margin-bottom: 0;
-  white-space: nowrap;
-}
-
-.invoice-settings-selector select {
-  flex: 0 1 320px;
-  min-width: 260px;
-}
-
-.invoice-settings-toolbar>.btn {
-  flex: 0 0 auto;
-}
-
 .invoice-settings-notice {
   margin-top: var(--space-3);
   padding: var(--space-3);
@@ -2249,22 +2233,6 @@ body.theme-dark .invoice-settings-preview {
     position: static;
   }
 
-  .invoice-settings-toolbar {
-    width: 100%;
-    align-items: stretch;
-  }
-
-  .invoice-settings-selector,
-  .invoice-settings-selector select {
-    width: 100%;
-    min-width: 0;
-  }
-
-  .invoice-settings-selector {
-    display: grid;
-    gap: var(--space-1);
-  }
-
   .invoice-settings-table {
     min-width: 720px;
   }
@@ -2498,130 +2466,81 @@ body.theme-dark .invoice-settings-preview {
 
 
 @media (min-width: 801px) {
-  .invoice-settings-toolbar {
+  .invoice-settings-context>.section-header {
     display: grid;
-    grid-template-columns: auto auto;
+    grid-template-columns: minmax(0, 1fr) max-content;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  .invoice-settings-context .invoice-settings-toolbar {
+    display: grid;
+    grid-template-columns: max-content max-content;
     align-items: center;
     justify-content: end;
     gap: var(--space-2);
     width: auto;
+    min-width: 0;
+    flex: none;
   }
 
-  .invoice-settings-selector {
+  .invoice-settings-context .invoice-settings-selector {
     display: grid;
-    grid-template-columns: auto 260px;
+    grid-template-columns: max-content 260px;
     align-items: center;
     gap: var(--space-2);
-    min-width: 0;
     width: auto;
+    min-width: 0;
+    flex: none;
   }
 
-  .invoice-settings-selector label {
+  .invoice-settings-context .invoice-settings-selector label {
+    display: block;
     margin: 0;
     white-space: nowrap;
   }
 
-  .invoice-settings-selector select {
+  .invoice-settings-context .invoice-settings-selector select {
     width: 260px;
     min-width: 260px;
+    max-width: 260px;
   }
 
-  .invoice-settings-toolbar>.btn {
+  .invoice-settings-context .invoice-settings-toolbar>.btn {
+    width: auto;
     white-space: nowrap;
+    flex: none;
   }
 }
 
 @media (max-width: 800px) {
-  .invoice-settings-toolbar {
+  .invoice-settings-context>.section-header {
     display: flex;
+  }
+
+  .invoice-settings-context .invoice-settings-toolbar {
+    display: flex;
+    flex-direction: column;
     width: 100%;
     align-items: stretch;
   }
 
-  .invoice-settings-selector {
+  .invoice-settings-context .invoice-settings-selector {
     display: grid;
+    flex: 1 1 auto;
     width: 100%;
+    min-width: 0;
     gap: var(--space-1);
   }
 
-  .invoice-settings-selector select {
+  .invoice-settings-context .invoice-settings-selector select {
     width: 100%;
     min-width: 0;
-  }
-}
-
-
-
-
-/* Invoice settings toolbar final override */
-@media (min-width: 801px) {
-  .invoice-settings-context>.section-header {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) max-content !important;
-    align-items: center !important;
-    gap: var(--space-4) !important;
-  }
-
-  .invoice-settings-context .invoice-settings-toolbar {
-    display: grid !important;
-    grid-template-columns: max-content max-content !important;
-    align-items: center !important;
-    justify-content: end !important;
-    gap: var(--space-2) !important;
-    width: auto !important;
-    min-width: 0 !important;
-    flex: none !important;
-  }
-
-  .invoice-settings-context .invoice-settings-selector {
-    display: grid !important;
-    grid-template-columns: max-content 260px !important;
-    align-items: center !important;
-    gap: var(--space-2) !important;
-    width: auto !important;
-    min-width: 0 !important;
-    flex: none !important;
-  }
-
-  .invoice-settings-context .invoice-settings-selector label {
-    display: block !important;
-    margin: 0 !important;
-    white-space: nowrap !important;
-  }
-
-  .invoice-settings-context .invoice-settings-selector select {
-    width: 260px !important;
-    min-width: 260px !important;
-    max-width: 260px !important;
+    max-width: none;
   }
 
   .invoice-settings-context .invoice-settings-toolbar>.btn {
-    width: auto !important;
-    white-space: nowrap !important;
-    flex: none !important;
-  }
-}
-
-@media (max-width: 800px) {
-  .invoice-settings-context>.section-header {
-    display: flex !important;
-  }
-
-  .invoice-settings-context .invoice-settings-toolbar {
-    display: flex !important;
-    width: 100% !important;
-    align-items: stretch !important;
-  }
-
-  .invoice-settings-context .invoice-settings-selector {
-    display: grid !important;
-    width: 100% !important;
-    gap: var(--space-1) !important;
-  }
-
-  .invoice-settings-context .invoice-settings-selector select {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: none !important;
+    box-sizing: border-box;
+    width: 100%;
   }
 }
