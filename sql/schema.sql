@@ -1,3 +1,6 @@
+-- Early base schema / historical setup file.
+-- For the final coursework/demo fresh install, import sql/full_setup.sql instead.
+
 CREATE DATABASE IF NOT EXISTS crm CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE crm;
 CREATE TABLE IF NOT EXISTS clients (

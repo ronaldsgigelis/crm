@@ -1,3 +1,6 @@
+-- Manual invoice templates table setup.
+-- Kept for history; for a final fresh install, import sql/full_setup.sql instead.
+
 CREATE TABLE IF NOT EXISTS invoice_templates (
   id INT AUTO_INCREMENT PRIMARY KEY,
   template_name VARCHAR(160) NOT NULL,

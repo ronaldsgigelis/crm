@@ -1,3 +1,6 @@
+-- Development-phase invoice schema snapshot.
+-- Kept for history; for a final fresh install, import sql/full_setup.sql instead.
+
 CREATE TABLE IF NOT EXISTS invoice_settings (
   id TINYINT UNSIGNED NOT NULL PRIMARY KEY,
   seller_name VARCHAR(160) NOT NULL,

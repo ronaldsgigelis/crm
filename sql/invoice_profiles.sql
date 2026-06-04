@@ -1,3 +1,6 @@
+-- Invoice seller profile table setup/migration from development.
+-- Kept for history; for a final fresh install, import sql/full_setup.sql instead.
+
 CREATE TABLE IF NOT EXISTS invoice_profiles (
   id INT AUTO_INCREMENT PRIMARY KEY,
   profile_name VARCHAR(255) NOT NULL,
