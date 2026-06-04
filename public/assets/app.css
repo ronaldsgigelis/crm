@@ -46,6 +46,12 @@ body {
   margin: 0;
 }
 
+img,
+svg,
+video {
+  max-width: 100%;
+}
+
 nav {
   display: flex;
   flex-wrap: wrap;
@@ -175,6 +181,7 @@ button {
 }
 
 .card {
+  box-sizing: border-box;
   background: var(--surface);
   border: 1px solid var(--border);
   padding: var(--space-4);
@@ -345,6 +352,9 @@ button {
 .table-wrap {
   width: 100%;
   overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   margin-top: 12px;
@@ -1972,6 +1982,24 @@ body.theme-dark .invoice-settings-preview {
     margin-top: var(--space-4);
   }
 
+  .content-stack,
+  .dashboard-page,
+  .invoices-page,
+  .job-detail-page,
+  .client-detail-page,
+  .my-jobs-page,
+  .invoice-show-page,
+  .invoice-form-page,
+  .manual-invoice-page,
+  .invoice-settings-page {
+    gap: var(--space-3);
+  }
+
+  .page-header,
+  .section-header {
+    align-items: flex-start;
+  }
+
   h1 {
     font-size: 1.6rem;
   }
@@ -1980,9 +2008,27 @@ body.theme-dark .invoice-settings-preview {
     margin-right: 0;
   }
 
+  .top-nav {
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  .nav-link {
+    flex: 1 1 auto;
+    justify-content: center;
+    min-width: max-content;
+  }
+
   .row,
   .form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .jobs-page,
+  .clients-page,
+  .masters-page {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
   }
 
   .filter-bar,
@@ -1994,8 +2040,21 @@ body.theme-dark .invoice-settings-preview {
     flex-basis: 100%;
   }
 
+  .filter-bar .btn,
+  .filter-group .btn {
+    justify-content: center;
+  }
+
   .invoice-preview-page {
     max-width: none;
+  }
+
+  .invoice-preview-wrap {
+    max-width: 100%;
+  }
+
+  .table-wrap {
+    max-width: 100%;
   }
 
   .profile-form-grid {
@@ -2099,6 +2158,7 @@ body.theme-dark .invoice-settings-preview {
 @media (max-width: 560px) {
   .app-shell {
     width: min(100% - 24px, 1360px);
+    padding: var(--space-3) 0;
   }
 
   .top-nav {
@@ -2107,12 +2167,30 @@ body.theme-dark .invoice-settings-preview {
   }
 
   .nav-link {
-    min-height: 32px;
+    min-height: 36px;
     padding: 6px 8px;
+    font-size: 0.92rem;
   }
 
   .card {
     padding: var(--space-3);
+    margin-top: var(--space-3);
+  }
+
+  .page {
+    margin-top: var(--space-3);
+  }
+
+  .page-header {
+    margin-bottom: var(--space-3);
+  }
+
+  .section {
+    gap: var(--space-2);
+  }
+
+  .section-header {
+    gap: var(--space-2);
   }
 
   .section-actions,
@@ -2122,6 +2200,11 @@ body.theme-dark .invoice-settings-preview {
     gap: var(--space-2);
   }
 
+  .section-actions,
+  .form-actions {
+    width: 100%;
+  }
+
   .section-actions>.btn,
   .form-actions>.btn,
   .table-actions>.btn,
@@ -2129,16 +2212,55 @@ body.theme-dark .invoice-settings-preview {
     flex: 1 1 auto;
   }
 
+  .form-actions>button,
+  .table-actions-form>.btn,
+  .table-actions-form>button {
+    width: 100%;
+  }
+
   .filter-bar {
     gap: var(--space-2);
+    padding: var(--space-2);
+  }
+
+  .filter-bar .field,
+  .filter-bar .form-grid,
+  .filter-bar .btn,
+  .filter-group,
+  .filter-group .btn {
+    width: 100%;
+  }
+
+  input,
+  select,
+  textarea {
+    min-height: 40px;
   }
 
   .btn {
-    min-height: 36px;
+    min-height: 40px;
   }
 
   .btn-small {
-    min-height: 30px;
+    min-height: 34px;
+  }
+
+  .table-wrap {
+    margin-top: var(--space-2);
+  }
+
+  .table {
+    font-size: 0.88rem;
+  }
+
+  .table th,
+  .table td {
+    padding: 7px 9px;
+  }
+
+  .td-date,
+  .metadata {
+    white-space: normal;
   }
 
   .dashboard-summary-grid {
@@ -2175,6 +2297,18 @@ body.theme-dark .invoice-settings-preview {
 
   .jobs-filter-bar {
     padding: var(--space-2);
+  }
+
+  .jobs-page,
+  .clients-page,
+  .masters-page {
+    gap: var(--space-3);
+  }
+
+  .jobs-create-form,
+  .clients-create-form,
+  .masters-create-form {
+    gap: var(--space-2);
   }
 
   .job-invoice-actions .btn,
