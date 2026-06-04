@@ -33,3 +33,80 @@
     setTheme(nextTheme);
   });
 })();
+
+(function () {
+  var form = document.querySelector('.invoice-settings-form');
+  var preview = document.querySelector('[data-invoice-number-preview]');
+
+  if (!form || !preview) {
+    return;
+  }
+
+  var numberingType = form.querySelector('[name="numbering_type"]');
+  var prefix = form.querySelector('[name="numbering_prefix"]');
+  var separator = form.querySelector('[name="numbering_separator"]');
+  var padding = form.querySelector('[name="numbering_padding"]');
+
+  if (!numberingType || !prefix || !separator || !padding) {
+    return;
+  }
+
+  function trim(value) {
+    return String(value || '').trim();
+  }
+
+  function padSequence(length) {
+    var safeLength = parseInt(length, 10);
+
+    if (!Number.isFinite(safeLength)) {
+      safeLength = 0;
+    }
+
+    safeLength = Math.max(1, Math.min(10, safeLength));
+    return '1'.padStart(safeLength, '0');
+  }
+
+  function dateParts() {
+    var now = new Date();
+    var day = String(now.getDate()).padStart(2, '0');
+    var month = String(now.getMonth() + 1).padStart(2, '0');
+    var year = String(now.getFullYear());
+
+    return {
+      dayMonthYear: day + month + year,
+      year: year
+    };
+  }
+
+  function renderPreview() {
+    var type = numberingType.value || 'yearly_sequence';
+    var cleanPrefix = trim(prefix.value);
+    var cleanSeparator = trim(separator.value);
+    var sequence = padSequence(padding.value);
+    var currentDate = dateParts();
+
+    if (type === 'manual') {
+      preview.textContent = 'Manuāls numurs';
+      return;
+    }
+
+    if (type === 'daily_sequence') {
+      preview.textContent = cleanPrefix + currentDate.dayMonthYear + cleanSeparator + sequence;
+      return;
+    }
+
+    if (type === 'continuous_sequence') {
+      preview.textContent = (cleanPrefix !== '' ? cleanPrefix + cleanSeparator : '') + sequence;
+      return;
+    }
+
+    preview.textContent = (cleanPrefix !== '' ? cleanPrefix + cleanSeparator : '') + currentDate.year + cleanSeparator + sequence;
+  }
+
+  [numberingType, prefix, separator, padding].forEach(function (field) {
+    field.addEventListener('input', renderPreview);
+    field.addEventListener('change', renderPreview);
+  });
+
+  renderPreview();
+})();

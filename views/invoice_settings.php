@@ -259,7 +259,10 @@
               </div>
             </div>
 
-            <p class="muted invoice-settings-preview"><strong>Priekšskatījums:</strong> <?= h(invoice_number_preview($profile)) ?></p>
+            <p class="muted invoice-settings-preview">
+              <strong>Priekšskatījums:</strong>
+              <span data-invoice-number-preview><?= h(invoice_number_preview($profile)) ?></span>
+            </p>
           </section>
 
           <section class="card section invoice-settings-actions">
