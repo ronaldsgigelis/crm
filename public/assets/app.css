@@ -1371,6 +1371,12 @@ button {
   gap: var(--space-4);
 }
 
+.manual-invoice-side {
+  position: sticky;
+  top: var(--space-4);
+  align-self: start;
+}
+
 .manual-invoice-panel {
   gap: var(--space-4);
 }
@@ -1423,8 +1429,7 @@ button {
 }
 
 .manual-invoice-actions {
-  position: sticky;
-  top: var(--space-4);
+  position: static;
 }
 
 .manual-invoice-actions .form-actions {
@@ -2217,6 +2222,7 @@ body.theme-dark .invoice-settings-preview {
     grid-template-columns: 1fr;
   }
 
+  .manual-invoice-side,
   .manual-invoice-actions {
     position: static;
   }
