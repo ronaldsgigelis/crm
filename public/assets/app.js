@@ -74,6 +74,7 @@
 
     return {
       dayMonthYear: day + month + year,
+      dayMonthShortYear: day + month + year.slice(-2),
       year: year
     };
   }
@@ -92,6 +93,11 @@
 
     if (type === 'daily_sequence') {
       preview.textContent = cleanPrefix + currentDate.dayMonthYear + cleanSeparator + sequence;
+      return;
+    }
+
+    if (type === 'daily_short_year') {
+      preview.textContent = cleanPrefix + currentDate.dayMonthShortYear + cleanSeparator + sequence;
       return;
     }
 

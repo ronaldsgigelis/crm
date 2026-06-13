@@ -45,9 +45,11 @@ function invoice_number_preview(array $profile): string
   $sequence = str_pad('1', $padding, '0', STR_PAD_LEFT);
   $year = date('Y');
   $date = date('dmY');
+  $shortDate = date('dmy');
 
   return match ($type) {
     'daily_sequence' => $prefix . $date . $separator . $sequence,
+    'daily_short_year' => $prefix . $shortDate . $separator . $sequence,
     'continuous_sequence' => ($prefix !== '' ? $prefix . $separator : '') . $sequence,
     'manual' => 'Manuāls numurs',
     default => ($prefix !== '' ? $prefix . $separator : '') . $year . $separator . $sequence,
@@ -57,7 +59,7 @@ function invoice_number_preview(array $profile): string
 function invoice_numbering_type(array $profile): string
 {
   $type = $profile['numbering_type'] ?? 'yearly_sequence';
-  return in_array($type, ['yearly_sequence', 'daily_sequence', 'continuous_sequence', 'manual'], true)
+  return in_array($type, ['yearly_sequence', 'daily_sequence', 'daily_short_year', 'continuous_sequence', 'manual'], true)
     ? $type
     : 'yearly_sequence';
 }
@@ -73,6 +75,7 @@ function invoice_format_sequence_number(array $profile, string $invoiceDate, int
 
   return match ($type) {
     'daily_sequence' => $prefix . $date->format('dmY') . $separator . $paddedSequence,
+    'daily_short_year' => $prefix . $date->format('dmy') . $separator . $paddedSequence,
     'continuous_sequence' => ($prefix !== '' ? $prefix . $separator : '') . $paddedSequence,
     'manual' => '',
     default => ($prefix !== '' ? $prefix . $separator : '') . $date->format('Y') . $separator . $paddedSequence,
@@ -92,6 +95,7 @@ function invoice_extract_sequence_from_number(string $invoiceNumber, array $prof
 
   $expectedPrefix = match ($type) {
     'daily_sequence' => $prefix . $date->format('dmY') . $separator,
+    'daily_short_year' => $prefix . $date->format('dmy') . $separator,
     'continuous_sequence' => $prefix !== '' ? $prefix . $separator : '',
     default => ($prefix !== '' ? $prefix . $separator : '') . $date->format('Y') . $separator,
   };
@@ -124,7 +128,7 @@ function invoice_generate_next_number(array $profile, string $invoiceDate): stri
   if (invoice_numbering_type($profile) === 'yearly_sequence') {
     $where = 'invoice_profile_id = :profile_id AND YEAR(invoice_date) = :invoice_year';
     $params[':invoice_year'] = $date->format('Y');
-  } elseif (invoice_numbering_type($profile) === 'daily_sequence') {
+  } elseif (in_array(invoice_numbering_type($profile), ['daily_sequence', 'daily_short_year'], true)) {
     $where = 'invoice_profile_id = :profile_id AND invoice_date = :invoice_date';
     $params[':invoice_date'] = $date->format('Y-m-d');
   } else {
@@ -283,7 +287,7 @@ function invoice_profile_post_data(array $existing = []): array
     $data[$field] = trim($_POST[$field] ?? '');
   }
 
-  $allowedNumberingTypes = ['yearly_sequence', 'daily_sequence', 'continuous_sequence', 'manual'];
+  $allowedNumberingTypes = ['yearly_sequence', 'daily_sequence', 'daily_short_year', 'continuous_sequence', 'manual'];
   if (!in_array($data['numbering_type'], $allowedNumberingTypes, true)) {
     $data['numbering_type'] = 'yearly_sequence';
   }

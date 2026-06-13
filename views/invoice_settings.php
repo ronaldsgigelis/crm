@@ -232,6 +232,7 @@
                 <?php foreach ([
                   'yearly_sequence' => 'Gada secība',
                   'daily_sequence' => 'Datums + dienas secība',
+                  'daily_short_year' => 'Datums + īsais gads',
                   'continuous_sequence' => 'Tikai kopējā secība',
                   'manual' => 'Manuāls numurs',
                 ] as $value => $label): ?>
