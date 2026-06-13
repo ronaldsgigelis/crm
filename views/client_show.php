@@ -4,6 +4,10 @@
 <?php /** @var array $jobs */ ?>
 <?php /** @var int $jobsCount */ ?>
 <?php /** @var float $totalAmount */ ?>
+<?php /** @var string|null $error */ ?>
+<?php /** @var string|null $notice */ ?>
+<?php $error = $error ?? null; ?>
+<?php $notice = $notice ?? null; ?>
 
 <!-- View: viena klienta kartīte + viņa darbu vēsture -->
 
@@ -16,6 +20,14 @@
 <?php else: ?>
 
     <div class="client-detail-page">
+    <?php if ($error): ?>
+        <p class="error"><?= h($error) ?></p>
+    <?php endif; ?>
+
+    <?php if ($notice): ?>
+        <p class="muted"><?= h($notice) ?></p>
+    <?php endif; ?>
+
     <div class="card section client-detail-panel">
         <!-- Klienta pamatinformācija -->
         <div class="section-header">
@@ -59,6 +71,46 @@
         <div class="section-actions mt-3">
             <a class="btn btn-secondary" href="<?= url('/clients') ?>">← Atpakaļ uz klientiem</a>
         </div>
+    </div>
+
+    <div class="card section client-detail-panel" id="client-edit">
+        <div class="section-header">
+            <div>
+                <h2 class="section-title">Labot klientu</h2>
+                <p class="metadata">Atjaunini klienta kontaktinformāciju.</p>
+            </div>
+        </div>
+
+        <form class="form" method="post" action="<?= url('/client-update') ?>">
+            <input type="hidden" name="id" value="<?= (int)$client['id'] ?>">
+            <div class="form-grid">
+                <div class="field">
+                    <label>Vārds*</label>
+                    <input name="name" required maxlength="120" value="<?= h($client['name']) ?>">
+                </div>
+                <div class="field">
+                    <label>Tālrunis</label>
+                    <input name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="40" value="<?= h($client['phone'] ?? '') ?>">
+                </div>
+                <div class="field">
+                    <label>E-pasts</label>
+                    <input name="email" type="email" autocomplete="email" maxlength="120" value="<?= h($client['email'] ?? '') ?>">
+                </div>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit">Saglabāt izmaiņas</button>
+                <a class="btn btn-secondary" href="<?= url('/clients') ?>">Atcelt</a>
+            </div>
+        </form>
+
+        <form
+            class="table-actions-form"
+            method="post"
+            action="<?= url('/client-delete') ?>"
+            onsubmit="return confirm('Vai tiešām dzēst šo klientu? Klientu ar piesaistītiem darbiem dzēst nevar.');">
+            <input type="hidden" name="id" value="<?= (int)$client['id'] ?>">
+            <button class="btn btn-danger" type="submit">Dzēst klientu</button>
+        </form>
     </div>
 
     <div class="card section client-jobs-panel">

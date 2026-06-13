@@ -34,6 +34,14 @@ if (is_route('GET', '/client')) {
   client_show();
   exit;
 }
+if (is_route('POST', '/client-update')) {
+  client_update();
+  exit;
+}
+if (is_route('POST', '/client-delete')) {
+  client_delete();
+  exit;
+}
 
 // Darbi
 if (is_route('GET', '/jobs')) {
@@ -70,6 +78,14 @@ if (is_route('GET', '/masters')) {
 }
 if (is_route('POST', '/masters')) {
   masters_store();
+  exit;
+}
+if (is_route('POST', '/master-update')) {
+  master_update();
+  exit;
+}
+if (is_route('POST', '/master-delete')) {
+  master_delete();
   exit;
 }
 

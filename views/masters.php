@@ -3,19 +3,30 @@
 /** @var array $masters */
 ?>
 <?php /** @var string|null $error */ ?>
+<?php /** @var string|null $notice */ ?>
+<?php /** @var array|null $editingMaster */ ?>
+<?php $notice = $notice ?? null; ?>
+<?php $editingMaster = $editingMaster ?? null; ?>
 
 <div class="row masters-page">
 
     <div class="card section masters-create-panel">
         <div class="section-header">
-            <h2 class="section-title">Pievienot meistaru</h2>
+            <h2 class="section-title"><?= $editingMaster ? 'Labot meistaru' : 'Pievienot meistaru' ?></h2>
         </div>
 
         <?php if ($error): ?>
             <p class="error"><?= h($error) ?></p>
         <?php endif; ?>
 
-        <form class="form masters-create-form" method="post" action="<?= url('/masters') ?>">
+        <?php if ($notice): ?>
+            <p class="muted"><?= h($notice) ?></p>
+        <?php endif; ?>
+
+        <form class="form masters-create-form" method="post" action="<?= url($editingMaster ? '/master-update' : '/masters') ?>">
+            <?php if ($editingMaster): ?>
+                <input type="hidden" name="id" value="<?= (int)$editingMaster['id'] ?>">
+            <?php endif; ?>
 
             <!-- Vārds ir obligāts -->
             <div class="field">
@@ -24,6 +35,7 @@
                     name="name"
                     required
                     maxlength="120"
+                    value="<?= h($editingMaster['name'] ?? '') ?>"
                     placeholder="Piemēram, Jānis Bērziņš">
             </div>
 
@@ -36,6 +48,7 @@
                     inputmode="tel"
                     autocomplete="tel"
                     maxlength="40"
+                    value="<?= h($editingMaster['phone'] ?? '') ?>"
                     placeholder="+371 20000000">
             </div>
 
@@ -47,11 +60,15 @@
                     type="email"
                     autocomplete="email"
                     maxlength="120"
+                    value="<?= h($editingMaster['email'] ?? '') ?>"
                     placeholder="meistars@example.com">
             </div>
 
             <div class="form-actions">
-                <button class="btn btn-primary" type="submit">Saglabāt</button>
+                <button class="btn btn-primary" type="submit"><?= $editingMaster ? 'Saglabāt izmaiņas' : 'Saglabāt' ?></button>
+                <?php if ($editingMaster): ?>
+                    <a class="btn btn-secondary" href="<?= url('/masters') ?>">Atcelt</a>
+                <?php endif; ?>
             </div>
         </form>
     </div>
@@ -71,12 +88,12 @@
                 <tr>
                     <th>Meistars</th>
                     <th>Kontaktinformācija</th>
-                    <th class="td-nowrap">Links meistaram</th>
+                    <th class="td-nowrap">Darbības</th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($masters as $m): ?>
-                    <tr>
+                    <tr class="<?= (int)($editingMaster['id'] ?? 0) === (int)$m['id'] ? 'selected-row' : '' ?>">
                         <td class="master-name-cell">
                             <div class="master-cell-stack">
                                 <div class="master-cell-main"><?= h($m['name']) ?></div>
@@ -95,6 +112,15 @@
                             <a class="btn btn-secondary btn-small master-token-link" href="<?= url('/my-jobs?token=' . h($m['token'])) ?>" target="_blank">
                                 Atvērt "my-jobs"
                             </a>
+                            <a class="btn btn-secondary btn-small" href="<?= url('/masters?edit_id=' . (int)$m['id']) ?>">Labot</a>
+                            <form
+                                class="table-actions-form"
+                                method="post"
+                                action="<?= url('/master-delete') ?>"
+                                onsubmit="return confirm('Vai tiešām dzēst šo meistaru? Meistaru ar piesaistītiem darbiem dzēst nevar.');">
+                                <input type="hidden" name="id" value="<?= (int)$m['id'] ?>">
+                                <button class="btn btn-danger btn-small" type="submit">Dzēst</button>
+                            </form>
                             </div>
                         </td>
                     </tr>

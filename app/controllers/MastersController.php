@@ -15,6 +15,43 @@ function masters_fetch_all(): array
     ")->fetchAll();
 }
 
+function master_find(int $id): ?array
+{
+    $stmt = db()->prepare("SELECT id, name, phone, email, token, created_at FROM masters WHERE id = :id LIMIT 1");
+    $stmt->execute([':id' => $id]);
+    $master = $stmt->fetch();
+
+    return $master ?: null;
+}
+
+function master_input_error(string $name, string $phone, string $email): ?string
+{
+    if ($name === '') {
+        return 'Vārds ir obligāts.';
+    }
+
+    if ($phone !== '') {
+        if (!preg_match('/^[0-9+\s()-]+$/', $phone)) {
+            return 'Tālrunī drīkst būt tikai cipari, +, atstarpes, iekavas un domuzīmes.';
+        }
+
+        if (substr_count($phone, '+') > 1 || (strpos($phone, '+') !== false && strpos($phone, '+') !== 0)) {
+            return 'Plus zīme telefonā drīkst būt tikai sākumā.';
+        }
+
+        $digits = preg_replace('/\D+/', '', $phone);
+        if (strlen($digits) < 5 || strlen($digits) > 25) {
+            return 'Tālruņa numurs ir pārāk īss vai pārāk garš.';
+        }
+    }
+
+    if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        return 'E-pasts nav korekts.';
+    }
+
+    return null;
+}
+
 /**
  * GET /masters
  * Parāda meistaru sarakstu un formu jauna meistara pievienošanai.
@@ -22,10 +59,28 @@ function masters_fetch_all(): array
 function masters_index(): void
 {
     $masters = masters_fetch_all();
+    $editId = (int)($_GET['edit_id'] ?? 0);
+    $editingMaster = $editId > 0 ? master_find($editId) : null;
+    $error = null;
+    $notice = null;
+
+    if ($editId > 0 && !$editingMaster) {
+        $error = 'Meistars nav atrasts.';
+    } elseif (isset($_GET['delete_blocked'])) {
+        $error = 'Meistaru nevar dzēst, jo tam ir piesaistīti darbi.';
+    }
+
+    if (isset($_GET['updated'])) {
+        $notice = 'Meistara dati saglabāti.';
+    } elseif (isset($_GET['deleted'])) {
+        $notice = 'Meistars izdzēsts.';
+    }
 
     render('masters.php', [
         'masters' => $masters,
-        'error' => null
+        'editingMaster' => $editingMaster,
+        'error' => $error,
+        'notice' => $notice,
     ], 'Meistari');
 }
 
@@ -121,6 +176,86 @@ function masters_store(): void
     ]);
 
     redirect(url('/masters'));
+}
+
+function master_update(): void
+{
+    $id = (int)($_POST['id'] ?? 0);
+    $name = trim($_POST['name'] ?? '');
+    $phone = trim($_POST['phone'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+
+    $existingMaster = $id > 0 ? master_find($id) : null;
+    if (!$existingMaster) {
+        redirect(url('/masters'));
+    }
+
+    $error = master_input_error($name, $phone, $email);
+    if ($error !== null) {
+        render('masters.php', [
+            'masters' => masters_fetch_all(),
+            'editingMaster' => array_merge($existingMaster, [
+                'name' => $name,
+                'phone' => $phone,
+                'email' => $email,
+            ]),
+            'error' => $error,
+            'notice' => null,
+        ], 'Meistari');
+        return;
+    }
+
+    $stmt = db()->prepare("
+        UPDATE masters
+        SET name = :name, phone = :phone, email = :email
+        WHERE id = :id
+    ");
+    $stmt->execute([
+        ':id' => $id,
+        ':name' => $name,
+        ':phone' => ($phone === '' ? null : $phone),
+        ':email' => ($email === '' ? null : $email),
+    ]);
+
+    redirect(url('/masters?edit_id=' . $id . '&updated=1'));
+}
+
+function master_delete(): void
+{
+    $id = (int)($_POST['id'] ?? 0);
+    if ($id <= 0) {
+        redirect(url('/masters'));
+    }
+
+    $pdo = db();
+    $pdo->beginTransaction();
+
+    try {
+        $stmt = $pdo->prepare("SELECT id FROM masters WHERE id = :id FOR UPDATE");
+        $stmt->execute([':id' => $id]);
+        if (!$stmt->fetch()) {
+            $pdo->rollBack();
+            redirect(url('/masters'));
+        }
+
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM jobs WHERE master_id = :id");
+        $stmt->execute([':id' => $id]);
+        if ((int)$stmt->fetchColumn() > 0) {
+            $pdo->rollBack();
+            redirect(url('/masters?edit_id=' . $id . '&delete_blocked=1'));
+        }
+
+        $stmt = $pdo->prepare("DELETE FROM masters WHERE id = :id");
+        $stmt->execute([':id' => $id]);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $e;
+    }
+
+    redirect(url('/masters?deleted=1'));
 }
 
 /**

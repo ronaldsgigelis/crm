@@ -2,6 +2,8 @@
 
 /** @var array $clients */ ?>
 <?php /** @var string|null $error */ ?>
+<?php /** @var string|null $notice */ ?>
+<?php $notice = $notice ?? null; ?>
 <!-- View: klientu pievienošana + saraksts -->
 
 <div class="row clients-page">
@@ -15,6 +17,10 @@
     <!-- Kļūdas ziņa (ja validācija neizgāja) -->
     <?php if ($error): ?>
       <p class="error"><?= h($error) ?></p>
+    <?php endif; ?>
+
+    <?php if ($notice): ?>
+      <p class="muted"><?= h($notice) ?></p>
     <?php endif; ?>
 
     <!-- POST forma uz /clients -->
@@ -100,6 +106,15 @@
             <td class="td-nowrap client-actions-cell">
               <div class="table-actions client-actions">
               <a class="btn btn-secondary btn-small" href="<?= url('/client?id=' . (int)$c['id']) ?>">Klienta kartīte</a>
+              <a class="btn btn-secondary btn-small" href="<?= url('/client?id=' . (int)$c['id'] . '#client-edit') ?>">Labot</a>
+              <form
+                class="table-actions-form"
+                method="post"
+                action="<?= url('/client-delete') ?>"
+                onsubmit="return confirm('Vai tiešām dzēst šo klientu? Klientu ar piesaistītiem darbiem dzēst nevar.');">
+                <input type="hidden" name="id" value="<?= (int)$c['id'] ?>">
+                <button class="btn btn-danger btn-small" type="submit">Dzēst</button>
+              </form>
               </div>
             </td>
           </tr>

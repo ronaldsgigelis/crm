@@ -15,6 +15,43 @@ function clients_fetch_all(): array
   return db()->query("SELECT * FROM clients ORDER BY id DESC")->fetchAll();
 }
 
+function client_find(int $id): ?array
+{
+  $stmt = db()->prepare("SELECT * FROM clients WHERE id = :id LIMIT 1");
+  $stmt->execute([':id' => $id]);
+  $client = $stmt->fetch();
+
+  return $client ?: null;
+}
+
+function client_input_error(string $name, string $phone, string $email): ?string
+{
+  if ($name === '') {
+    return 'Vārds ir obligāts.';
+  }
+
+  if ($phone !== '') {
+    if (!preg_match('/^[0-9+\s()-]+$/', $phone)) {
+      return 'Tālrunī drīkst būt tikai cipari, +, atstarpes, iekavas un domuzīmes.';
+    }
+
+    if (substr_count($phone, '+') > 1 || (strpos($phone, '+') !== false && strpos($phone, '+') !== 0)) {
+      return 'Plus zīme drīkst būt tikai sākumā.';
+    }
+
+    $digits = preg_replace('/\D+/', '', $phone);
+    if (strlen($digits) < 5 || strlen($digits) > 25) {
+      return 'Tālruņa numurs ir pārāk īss vai pārāk garš.';
+    }
+  }
+
+  if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    return 'E-pasts nav korekts.';
+  }
+
+  return null;
+}
+
 /*
 Paņem visus klientus no DB (SELECT * FROM clients)
 sakārto pēdējos augšā (ORDER BY id DESC)
@@ -23,7 +60,8 @@ nodod datus uz view views/clients.php caur render()
 function clients_index(): void
 {
   $clients = clients_fetch_all();
-  render('clients.php', ['clients' => $clients, 'error' => null], 'Klienti');
+  $notice = isset($_GET['deleted']) ? 'Klients izdzēsts.' : null;
+  render('clients.php', ['clients' => $clients, 'error' => null, 'notice' => $notice], 'Klienti');
 }
 
 // Ievadi normalizēju ar trim un droši paņemu ar null-coalescing
@@ -38,61 +76,12 @@ function clients_store(): void
   $phone = trim($_POST['phone'] ?? '');
   $email = trim($_POST['email'] ?? '');
 
-  // Validācija
-  /*
-    atkal paņem sarakstu (lai lapa var parādīt datus)
-    renderē to pašu view ar kļūdas ziņu error
-    return pārtrauc izpildi
-  */
-
-  // Vārds ir obligāts
-  if ($name === '') {
+  $error = client_input_error($name, $phone, $email);
+  if ($error !== null) {
     render('clients.php', [
       'clients' => clients_fetch_all(),
-      'error' => 'Vārds ir obligāts.'
-    ], 'Klienti');
-    return;
-  }
-
-  // Phone validācija: atļauj +, ciparus, atstarpes, iekavas, domuzīmes
-  if ($phone !== '') {
-
-    // 1) Atļautie simboli
-    if (!preg_match('/^[0-9+\s()-]+$/', $phone)) {
-      render('clients.php', [
-        'clients' => clients_fetch_all(),
-        'error' => 'Tālrunī drīkst būt tikai cipari, +, atstarpes, iekavas un domuzīmes.'
-      ], 'Klienti');
-      return;
-    }
-
-    // 2) Plus zīme tikai sākumā (ja vispār ir)
-    if (substr_count($phone, '+') > 1 || (strpos($phone, '+') !== false && strpos($phone, '+') !== 0)) {
-      render('clients.php', [
-        'clients' => clients_fetch_all(),
-        'error' => 'Plus zīme drīkst būt tikai sākumā.'
-      ], 'Klienti');
-      return;
-    }
-
-    // 3) Ciparu skaits (izmetam visu, kas nav cipars)
-    $digits = preg_replace('/\D+/', '', $phone);
-
-    // ļaujam starptautiski: 5..25 cipari
-    if (strlen($digits) < 5 || strlen($digits) > 25) {
-      render('clients.php', [
-        'clients' => clients_fetch_all(),
-        'error' => 'Tālruņa numurs ir pārāk īss vai pārāk garš.'
-      ], 'Klienti');
-      return;
-    }
-  }
-
-  // E-pasta validācija
-  if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    render('clients.php', [
-      'clients' => clients_fetch_all(),
-      'error' => 'E-pasts nav korekts.'
+      'error' => $error,
+      'notice' => null
     ], 'Klienti');
     return;
   }
@@ -114,6 +103,82 @@ function clients_store(): void
   redirect(url('/clients'));
 }
 
+function client_update(): void
+{
+  $id = (int)($_POST['id'] ?? 0);
+  $name = trim($_POST['name'] ?? '');
+  $phone = trim($_POST['phone'] ?? '');
+  $email = trim($_POST['email'] ?? '');
+
+  if ($id <= 0 || !client_find($id)) {
+    redirect(url('/clients'));
+  }
+
+  $error = client_input_error($name, $phone, $email);
+  if ($error !== null) {
+    $client = client_find($id);
+    if ($client) {
+      $client['name'] = $name;
+      $client['phone'] = $phone;
+      $client['email'] = $email;
+    }
+    client_render_detail($id, $error, null, $client);
+    return;
+  }
+
+  $stmt = db()->prepare("
+    UPDATE clients
+    SET name = :name, phone = :phone, email = :email
+    WHERE id = :id
+  ");
+  $stmt->execute([
+    ':id' => $id,
+    ':name' => $name,
+    ':phone' => ($phone === '' ? null : $phone),
+    ':email' => ($email === '' ? null : $email),
+  ]);
+
+  redirect(url('/client?id=' . $id . '&updated=1'));
+}
+
+function client_delete(): void
+{
+  $id = (int)($_POST['id'] ?? 0);
+  if ($id <= 0) {
+    redirect(url('/clients'));
+  }
+
+  $pdo = db();
+  $pdo->beginTransaction();
+
+  try {
+    $stmt = $pdo->prepare("SELECT id FROM clients WHERE id = :id FOR UPDATE");
+    $stmt->execute([':id' => $id]);
+    if (!$stmt->fetch()) {
+      $pdo->rollBack();
+      redirect(url('/clients'));
+    }
+
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM jobs WHERE client_id = :id");
+    $stmt->execute([':id' => $id]);
+    if ((int)$stmt->fetchColumn() > 0) {
+      $pdo->rollBack();
+      redirect(url('/client?id=' . $id . '&delete_blocked=1'));
+    }
+
+    $stmt = $pdo->prepare("DELETE FROM clients WHERE id = :id");
+    $stmt->execute([':id' => $id]);
+    $pdo->commit();
+  } catch (Throwable $e) {
+    if ($pdo->inTransaction()) {
+      $pdo->rollBack();
+    }
+    throw $e;
+  }
+
+  redirect(url('/clients?deleted=1'));
+}
+
 /*
 GET /client?id=...
 Parāda viena klienta kartīti:
@@ -124,43 +189,35 @@ Parāda viena klienta kartīti:
 */
 function client_show(): void
 {
-  // id no query string
   $id = (int)($_GET['id'] ?? 0);
+  $error = isset($_GET['delete_blocked'])
+    ? 'Klientu nevar dzēst, jo tam ir piesaistīti darbi.'
+    : null;
+  $notice = isset($_GET['updated']) ? 'Klienta dati saglabāti.' : null;
 
-  // Ja id nav korekts, rādam "nav atrasts"
-  if ($id <= 0) {
-    render('client_show.php', [
-      'client' => null,
-      'jobs' => [],
-      'jobsCount' => 0,
-      'totalAmount' => 0
-    ], 'Klienta kartīte');
-    return;
-  }
+  client_render_detail($id, $error, $notice);
+}
 
-  // Atrodam klientu pēc id
-  $stmt = db()->prepare("
-    SELECT *
-    FROM clients
-    WHERE id = :id
-    LIMIT 1
-  ");
-  $stmt->execute([':id' => $id]);
-  $client = $stmt->fetch();
+function client_render_detail(int $id, ?string $error = null, ?string $notice = null, ?array $formClient = null): void
+{
+  $client = $id > 0 ? client_find($id) : null;
 
-  // Ja klienta nav, rādam "nav atrasts"
   if (!$client) {
     render('client_show.php', [
       'client' => null,
       'jobs' => [],
       'jobsCount' => 0,
-      'totalAmount' => 0
+      'totalAmount' => 0,
+      'error' => $error,
+      'notice' => $notice,
     ], 'Klienta kartīte');
     return;
   }
 
-  // Paņemam visus šī klienta darbus
-  // Pievienojam meistara vārdu, ja ir piešķirts
+  if ($formClient !== null) {
+    $client = array_merge($client, $formClient);
+  }
+
   $stmt = db()->prepare("
     SELECT
       j.*,
@@ -176,11 +233,7 @@ function client_show(): void
   $stmt->execute([':client_id' => $id]);
   $jobs = $stmt->fetchAll();
 
-  // Darbu skaits
   $jobsCount = count($jobs);
-
-  // Kopējā summa
-  // Saskaitām tikai tās cenas, kas nav NULL
   $totalAmount = 0;
   foreach ($jobs as $job) {
     if ($job['price'] !== null && $job['price'] !== '') {
@@ -192,6 +245,8 @@ function client_show(): void
     'client' => $client,
     'jobs' => $jobs,
     'jobsCount' => $jobsCount,
-    'totalAmount' => $totalAmount
+    'totalAmount' => $totalAmount,
+    'error' => $error,
+    'notice' => $notice,
   ], 'Klienta kartīte');
 }
