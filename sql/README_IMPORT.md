@@ -16,8 +16,19 @@ The other SQL files in this folder are kept for development history and incremen
 
 Recommended import methods:
 
-- phpMyAdmin: open the local MySQL server, select or create the `crm` database, then import `sql/full_setup.sql`.
-- MySQL command line: run `mysql -u root < sql/full_setup.sql` from the project root, or adjust the `CREATE DATABASE` / `USE` lines in `full_setup.sql` if your local database name is different.
+* phpMyAdmin: open the local MySQL server, select or create the `crm` database, then import `sql/full_setup.sql` or `sql/demo_setup.sql`.
+* MySQL command line: run `mysql -u root < sql/full_setup.sql` from the project root, or use `mysql -u root < sql/demo_setup.sql` for the prepared demo database.
+
+## Demo database
+
+For presentation, an optional `sql/demo_setup.sql` file can be used.
+
+* `sql/full_setup.sql` - clean empty database structure.
+* `sql/demo_setup.sql` - prepared demo database with sample clients, masters, jobs, invoice profiles, invoices, and templates.
+
+If `demo_setup.sql` is available, import it instead of `full_setup.sql` for the coursework presentation.
+
+Note: demo data may reference uploaded files, for example invoice logos. When moving the project to another computer, copy the full project folder, including `public/uploads/` if it exists.
 
 If importing into an existing database, make a backup first.
 
