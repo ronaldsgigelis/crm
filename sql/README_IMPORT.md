@@ -1,6 +1,6 @@
 # Database Import
 
-For a fresh coursework/demo install, create an empty local MySQL/MariaDB database and import `sql/full_setup.sql`. The file creates and uses the default project database name, `crm`.
+For a quick qualification demonstration, import `sql/demo_setup.sql` into a local MySQL/MariaDB server to install the structure with prepared sample data. For an empty installation without demo records, import `sql/full_setup.sql` instead. Both standalone files create/use the default project database name, `crm`.
 
 Do not rely on `sql/schema.sql` alone for the final version. It is an early base schema from development and does not include all current invoice profile, numbering, payment status, and manual invoice template structure.
 

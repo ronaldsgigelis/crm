@@ -1,176 +1,142 @@
-# CRM sistēmas prototips / CRM System Prototype
+# Service Business CRM — PHP / MySQL Prototype
 
-## Apraksts / Description
+**Qualification project · PHP 8.1+ · MySQL/MariaDB · PDO · JavaScript · Dompdf**
 
-Latvian:
-Šis ir PHP MVC CRM sistēmas prototips kursa darbam un lokālai demonstrācijai. Projekts nodrošina klientu, darbu/pasūtījumu un meistaru pārvaldību, rēķinu pārvaldību, apmaksas statusu uzskaiti, informācijas paneli ar statistiku, manuālu rēķinu izveidi un PDF rēķinu eksportu.
+A server-rendered CRM prototype for a small service business. It brings client records, assigned jobs, contractors, invoices and payment statuses into one place.
 
-English:
-This is a PHP MVC CRM system prototype for coursework and local demonstration. The project provides client, job/order and master management, invoice management, payment status tracking, a dashboard with statistics, manual invoice creation and PDF invoice export.
+Designed and implemented by **Ronalds Gigelis** as a programming technician qualification project (2026). This is a **local demonstration prototype, not production software**.
 
-## Galvenās iespējas / Main Features
+[Latviski](#latviski) · [Features](#features) · [Screenshots](#screenshots) · [Run locally](#run-locally) · [Project documents](#project-documents)
 
-Latvian:
-- Informācijas panelis ar kopsavilkumiem un statistiku.
-- Klientu izveide, apskate, rediģēšana un dzēšana.
-- Darbu/pasūtījumu izveide, apskate, rediģēšana, statusu maiņa un filtrēšana.
-- Meistaru pārvaldība un publiska meistara darbu lapa ar token saiti.
-- Rēķinu iestatījumi un pārdevēja profili.
-- Rēķinu ģenerēšana no CRM darba.
-- Manuāla rēķinu izveide un rēķinu sagataves.
-- PDF rēķinu eksports ar Dompdf.
-- Apmaksātu, neapmaksātu un kavētu rēķinu statusu uzskaite.
-- Rēķinu filtri pēc tipa un apmaksas statusa.
-- Gaišais/tumšais UI režīms.
+## Screenshots
 
-English:
-- Dashboard with summaries and statistics.
-- Client creation, viewing, editing and deletion.
-- Job/order creation, viewing, editing, status changes and filtering.
-- Master management and a public master job page using a token link.
-- Invoice settings and seller profiles.
-- Invoice generation from a CRM job.
-- Manual invoice creation and invoice templates.
-- PDF invoice export with Dompdf.
-- Paid, unpaid and overdue invoice status tracking.
-- Invoice filters by type and payment status.
-- Light/dark UI mode.
+Actual screenshots of the developed application. Personal/contact details are masked in this public portfolio edition; the figures shown are demonstration data.
 
-## Tehnoloģijas / Technologies
+| Dashboard | Jobs, filters & statuses |
+|:---:|:---:|
+| [![CRM dashboard](screenshots/dashboard.png)](screenshots/dashboard.png) | [![Jobs management](screenshots/jobs.png)](screenshots/jobs.png) |
+| **Invoice management** | **Manual invoice generator** |
+| [![Invoices and payment statuses](screenshots/invoices.png)](screenshots/invoices.png) | [![Manual invoice generator](screenshots/manual-invoice.png)](screenshots/manual-invoice.png) |
 
-Latvian:
-- PHP
-- MySQL/MariaDB
-- PDO
-- HTML
-- CSS
-- JavaScript
-- Composer
-- Dompdf
-- Lokāls Apache/XAMPP vai PHP iebūvētais serveris
+## Features
 
-English:
-- PHP
-- MySQL/MariaDB
-- PDO
-- HTML
-- CSS
-- JavaScript
-- Composer
-- Dompdf
-- Local Apache/XAMPP or the PHP built-in server
+- **Clients:** add, view, edit and delete client records.
+- **Masters/contractors:** manage contacts; view assigned work via a token-based page.
+- **Jobs:** create and edit work orders, assign clients and masters, change statuses and filter lists.
+- **Dashboard:** overview of jobs, invoices, unpaid items and recent activity.
+- **Invoices:** generate an invoice from a job or create one manually, using seller profiles and configurable numbering.
+- **PDF:** preview and export invoices with Dompdf.
+- **Payments:** manually record paid/unpaid status and see overdue invoices; there is **no payment gateway**.
+- **Interface:** light/dark theme and basic responsive layout.
 
-## Projekta struktūra / Project Structure
+The CRM is intentionally limited in scope for the qualification demonstration. Authentication, role-based authorization, CSRF protection and fuller payment history are **not yet implemented**.
 
-Latvian:
-- `public/` - publiskā tīmekļa sakne.
-- `public/index.php` - galvenais front controller un maršrutu izpilde.
-- `public/assets/` - projekta CSS un JavaScript faili.
-- `app/` - konfigurācija, datubāzes savienojums, palīgfunkcijas un maršrutu funkcijas.
-- `app/controllers/` - MVC kontrolieri klientiem, darbiem, meistariem, rēķiniem un panelim.
-- `views/` - HTML/PHP skatu faili.
-- `sql/` - datubāzes struktūras, demo dati un importēšanas dokumentācija.
-- `vendor/` - Composer instalētās bibliotēkas.
-- `composer.json` - PHP atkarību konfigurācija.
+## Technology
 
-English:
-- `public/` - public web root.
-- `public/index.php` - main front controller and route execution.
-- `public/assets/` - project CSS and JavaScript files.
-- `app/` - configuration, database connection, helpers and route functions.
-- `app/controllers/` - MVC controllers for clients, jobs, masters, invoices and dashboard.
-- `views/` - HTML/PHP view files.
-- `sql/` - database structure, demo data and import documentation.
-- `vendor/` - Composer-installed libraries.
-- `composer.json` - PHP dependency configuration.
+| Layer | Implementation |
+|---|---|
+| Application | PHP 8.1+, server-rendered pages, simplified MVC structure |
+| Database | MySQL/MariaDB, PDO |
+| Frontend | HTML, CSS, JavaScript |
+| PDF generation | Dompdf |
+| Dependencies | Composer |
+| Development/demo | Git, XAMPP (Apache + MySQL/MariaDB) |
 
-## Uzstādīšana lokāli / Local Installation
+### Architecture and database
 
-Latvian:
-1. Iekopējiet projektu XAMPP `htdocs` mapē vai citā lokālā PHP vidē.
-2. Izveidojiet tukšu MySQL/MariaDB datubāzi.
-3. Detalizētām datubāzes importēšanas instrukcijām izmantojiet `sql/README_IMPORT.md`.
-4. Pārbaudiet datubāzes pieslēguma iestatījumus failā `app/config.php`.
-5. Palaidiet Apache/MySQL vai izmantojiet PHP iebūvēto serveri.
-6. Atveriet projektu pārlūkprogrammā.
+The front controller `public/index.php` routes requests to PHP controllers. Controllers coordinate database access through PDO and render the PHP views; invoice output uses Dompdf.
 
-English:
-1. Copy the project into XAMPP `htdocs` or another local PHP environment.
-2. Create an empty MySQL/MariaDB database.
-3. Use `sql/README_IMPORT.md` for detailed database setup/import instructions.
-4. Check the database connection settings in `app/config.php`.
-5. Start Apache/MySQL or use the PHP built-in server.
-6. Open the project in a browser.
+Core tables: `clients`, `masters`, `jobs`, `invoices`, `invoice_profiles`, `invoice_templates`.
+
+## Run locally
+
+**Requirements:** PHP 8.1+, MySQL/MariaDB, Composer. For logos in PDF invoices, enable the PHP **GD** extension. This project has been prepared for local XAMPP demonstration.
+
+1. Clone or download this repository into `C:\xampp\htdocs\crm` (or an equivalent web-server directory).
+2. In the **project root**, install Composer dependencies:
+
+   ```bash
+   composer install
+   ```
+
+3. Start **Apache** and **MySQL** in XAMPP.
+4. In phpMyAdmin, import **one** of the two standalone SQL setup files:
+   - `sql/demo_setup.sql` — database schema plus prepared sample records (**recommended for a quick demo**).
+   - `sql/full_setup.sql` — empty CRM structure, without sample records.
+
+   Both target the database named `crm`. Use a fresh/test database: importing setup SQL into an existing database can overwrite data.
+5. If necessary, set the local MySQL host, database name, username and password in `app/config.php`.
+6. Open **http://localhost/crm/public/** in a browser.
+
+Alternatively, from the project root, after the database is running:
 
 ```bash
 php -S localhost:8081 -t public
 ```
 
-## Datubāze / Database
+Then open **http://localhost:8081/**.
 
-Latvian:
-Detalizētas datubāzes izveides un importēšanas instrukcijas ir pieejamas failā `sql/README_IMPORT.md`.
+For full installation notes see **[sql/README_IMPORT.md](sql/README_IMPORT.md)**. The additional SQL files in `sql/` are historical/incremental migrations; they are **not** all required after importing a complete setup file.
 
-English:
-Detailed database setup and import instructions are available in `sql/README_IMPORT.md`.
+> **Note:** the `vendor/` directory is intentionally excluded from Git and is restored by `composer install`. Uploaded invoice logos in `public/uploads/` are not tracked; for a custom logo, add it again through the CRM invoice settings. Do not commit credentials or real customer records.
 
-## Palaišana / Running the Project
+## Demonstration checklist
 
-Latvian:
-Projektu ieteicams servēt no `public/` mapes. XAMPP vidē to var atvērt caur lokālo Apache adresi, vai arī projekta saknē palaist:
+- Open dashboard and confirm the sample counts.
+- Add and edit a client, contractor and job.
+- Filter jobs, change job status and assign a contractor.
+- Generate an invoice from a job and export it as PDF.
+- Create a manual invoice, use a saved template and preview it.
+- Change an invoice payment status and use the overdue filters.
+- Toggle light/dark mode.
 
-English:
-The project should be served from the `public/` directory. In XAMPP it can be opened through the local Apache address, or from the project root run:
+These describe manual testing scenarios, **not automated test coverage**.
 
-```bash
-php -S localhost:8081 -t public
+## Project documents
+
+The GitHub portfolio includes the written qualification materials:
+
+- **[Qualification documentation — DOCX](docs/qualification-documentation-public.docx)** (126-page technical report)
+- **[Defense presentation — PPTX](docs/defense-presentation-public.pptx)** (13 slides)
+- **[Source code appendix — DOCX](pirmkods_pielikums.docx)**
+
+These are **public portfolio copies**. Screenshots with personal or company contact details have been redacted. The originals submitted for the qualification defense were left unchanged.
+
+## Limitations and security
+
+**Do not expose this prototype directly to the public internet or use it with real customer data.**
+
+- User authentication and permissions are outside the current scope.
+- CSRF protection and production security hardening are not complete.
+- Token-based master pages should not be treated as a complete authorization system.
+- Payment statuses are manually managed; no banking/payment integrations.
+- This repository is a coursework/qualification deliverable, not an actively supported commercial CRM product.
+
+## Repository structure
+
+```text
+app/                 Controllers, routes, configuration, PDO
+public/              Front controller, CSS/JS and web assets
+views/               PHP templates
+sql/                 Standalone setup files and migrations
+screenshots/         Anonymized CRM interface images
+docs/                Public copies of qualification documents
+composer.json        PHP dependencies
+README.md            Project overview and quick start
 ```
 
-## Testēšanas saraksts / Testing Checklist
+## Latviski
 
-Latvian:
-- Atvērt informācijas paneli.
-- Izveidot un apskatīt klientu.
-- Izveidot un apskatīt darbu/pasūtījumu.
-- Izveidot un apskatīt meistaru.
-- Ģenerēt un apskatīt rēķinu.
-- Izveidot manuālu rēķinu.
-- Eksportēt rēķinu PDF formātā.
-- Mainīt apmaksāts/neapmaksāts statusu.
-- Pārbaudīt filtrus.
-- Pārbaudīt tumšo režīmu.
+**Kvalifikācijas darba tēma:** “CRM sistēmas prototipa izstrāde pakalpojumu uzņēmuma darbu un rēķinu pārvaldībai”.
 
-English:
-- Open the dashboard.
-- Create and view a client.
-- Create and view a job/order.
-- Create and view a master.
-- Generate and view an invoice.
-- Create a manual invoice.
-- Export an invoice as PDF.
-- Change paid/unpaid status.
-- Test filters.
-- Test dark mode.
+Izstrādāts PHP/MySQL CRM prototips klientu, meistaru, darbu un rēķinu pārvaldībai. Sistēma paredzēta lokālai demonstrācijai, izmantojot XAMPP un sagatavotus demonstrācijas datus. Projekts atbalsta rēķinu ģenerēšanu no darba, manuālus rēķinus, PDF eksportu, statusu un filtru pārvaldību. Tā nav gatava produkcijas videi bez autentifikācijas, piekļuves tiesībām un citiem drošības uzlabojumiem.
 
-## Svarīgas piezīmes / Important Notes
+**Palaišana:** `composer install` → XAMPP Apache/MySQL → `sql/demo_setup.sql` imports → `http://localhost/crm/public/`.
 
-Latvian:
-- Šis ir kursa darba/prototipa projekts lokālai un demonstrācijas lietošanai.
-- Datubāzes piekļuves dati failā `app/config.php` jāpielāgo lokālajai videi.
-- Projektu ieteicams servēt no `public/` mapes.
-- Detalizētas datubāzes instrukcijas ir failā `sql/README_IMPORT.md`.
-- Nepublicējiet reālus privātos piekļuves datus, klientu datus vai uzņēmuma informāciju.
-- Publiskas token saites nedrīkst kopīgot publiski bez piekļuves kontroles izvērtēšanas.
+Pilnā dokumentācija un prezentācija atrodas mapē **[docs/](docs/)**.
 
-English:
-- This is a coursework/prototype project for local and demo use.
-- Database credentials in `app/config.php` should be adjusted for the local environment.
-- The project should be served from the `public/` directory.
-- Detailed database instructions are in `sql/README_IMPORT.md`.
-- Do not publish real private credentials, real client data or private company information.
-- Public token links should not be shared publicly without an access-control review.
+---
 
-## Autors / Author
+**Author:** Ronalds Gigelis · 2026
 
-Author: Ronalds Gigelis  
-Project type: coursework / CRM prototype
+**License:** No open-source license is granted at present. The source is public for evaluation/portfolio review; redistribution or use in other projects requires permission from the copyright holder.
