@@ -1,8 +1,8 @@
-# Service Business CRM — PHP / MySQL Prototype
+# Service Business CRM & Invoice Manager
 
 **Qualification project · PHP 8.1+ · MySQL/MariaDB · PDO · JavaScript · Dompdf**
 
-A server-rendered CRM prototype for a small service business. It brings client records, assigned jobs, contractors, invoices and payment statuses into one place.
+A PHP/MySQL business management prototype for service businesses: clients, jobs, contractors, invoice creation, PDF export and payment-status tracking in one application. Built with server-rendered PHP and a simplified MVC architecture.
 
 Designed and implemented by **Ronalds Gigelis** as a programming technician qualification project (2026). This is a **local demonstration prototype, not production software**.
 
